@@ -1,0 +1,77 @@
+{
+  "name": "ice-web-components-dsl",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "大漠穷秋",
+  "description": "A JSON-first DSL layer for AI agents to build forms with ice-web-components.",
+  "keywords": [
+    "dsl",
+    "form",
+    "json",
+    "ai-agent",
+    "ice-web-components",
+    "ui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ice-render/ice-web-components-dsl.git"
+  },
+  "homepage": "https://github.com/ice-render/ice-web-components-dsl#readme",
+  "bugs": {
+    "url": "https://github.com/ice-render/ice-web-components-dsl/issues"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/types/index.d.ts",
+  "browser": "dist/index.umd.js",
+  "unpkg": "dist/index.umd.js",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && npm run build:types && npm run build:js",
+    "build:js": "rollup -c --environment NODE_ENV:production",
+    "build:types": "tsc --emitDeclarationOnly",
+    "clean": "rimraf dist",
+    "dev": "rollup -c -w --environment NODE_ENV:development",
+    "test": "jest --runInBand",
+    "types:check": "tsc --noEmit",
+    "verify": "npm run types:check && npm run build && npm test -- --runInBand",
+    "prepublishOnly": "npm run verify",
+    "test:e2e": "npm run build && playwright test",
+    "verify:full": "npm run verify && npm run test:e2e"
+  },
+  "peerDependencies": {
+    "ice-render": "^2.10.0",
+    "ice-web-components": "^1.11.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.28.5",
+    "@babel/preset-env": "7.28.5",
+    "@babel/preset-typescript": "7.28.5",
+    "@playwright/test": "^1.63.0",
+    "@rollup/plugin-babel": "6.1.0",
+    "@rollup/plugin-commonjs": "28.0.1",
+    "@rollup/plugin-json": "6.1.0",
+    "@rollup/plugin-node-resolve": "15.3.1",
+    "@rollup/plugin-terser": "0.4.4",
+    "@types/jest": "29.5.14",
+    "babel-jest": "29.7.0",
+    "http-server": "^14.1.1",
+    "ice-render": "^2.12.0",
+    "ice-web-components": "^1.11.2",
+    "jest": "29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "rimraf": "5.0.10",
+    "rollup": "3.29.5",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
+  }
+}

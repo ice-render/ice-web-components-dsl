@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ice-render/ice-web-components-dsl/schema/form-dsl.schema.json",
+  "title": "ice-web-components-dsl · 表单 DSL",
+  "description": "一份 JSON 声明 → 一张真表单。注意：DSL 里没有 left/top，布局由 layout 与引擎的箱式布局决定。",
+  "type": "object",
+  "required": ["kind", "fields"],
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": { "const": 1, "description": "当前是 1" },
+    "kind": { "const": "form", "description": "当前只支持 form" },
+    "title": { "type": "string" },
+    "description": { "type": "string", "description": "标题下的一句话说明" },
+    "layout": { "enum": ["vertical", "horizontal"], "description": "标签在上（默认）或左侧" },
+    "width": { "type": "number", "exclusiveMinimum": 0, "description": "表单宽度（CSS 像素），默认 360" },
+    "gap": { "type": "number", "exclusiveMinimum": 0, "description": "字段间距，默认 12" },
+    "submitText": {
+      "type": ["string", "null"],
+      "description": "提交按钮文案，默认「提交」；null 表示不生成提交按钮"
+    },
+    "fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/field" }
+    }
+  },
+  "definitions": {
+    "option": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "string" },
+        "label": { "type": "string", "description": "省略时编译期用 value 兜底" },
+        "disabled": { "type": "boolean" }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "minLength": { "type": "number" },
+        "maxLength": { "type": "number" },
+        "pattern": { "type": "string", "description": "正则字符串（JSON 写不出正则字面量）" },
+        "message": { "type": "string" }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "description": "取值键，必须唯一；dependencies 也引用它" },
+        "type": {
+          "enum": [
+            "text", "textarea", "password", "number", "slider",
+            "checkbox", "switch", "radio-group", "checkbox-group", "select", "date"
+          ]
+        },
+        "label": { "type": "string", "description": "省略时用 name" },
+        "placeholder": { "type": "string" },
+        "default": { "description": "类型需与字段类型一致；选项型字段必须是某个选项的 value" },
+
+        "required": { "type": "boolean" },
+        "min": { "type": "number", "description": "number/slider 上会同时约束控件与生成规则" },
+        "max": { "type": "number" },
+        "minLength": { "type": "number" },
+        "maxLength": { "type": "number", "description": "文本类字段上会同时限制输入长度与生成规则" },
+        "pattern": { "type": "string" },
+        "message": { "type": "string" },
+        "rules": { "type": "array", "items": { "$ref": "#/definitions/rule" } },
+
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "被依赖字段变化时本字段立刻重算（跨字段校验）"
+        },
+
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/option" },
+          "description": "select / radio-group / checkbox-group 必需"
+        },
+
+        "step": { "type": "number" },
+        "precision": { "type": "number" },
+        "range": { "type": "boolean" },
+        "mode": { "enum": ["single", "multiple", "tags"] },
+        "showSearch": { "type": "boolean" },
+        "placement": {
+          "enum": [
+            "top", "topLeft", "topRight",
+            "bottom", "bottomLeft", "bottomRight",
+            "left", "leftTop", "leftBottom",
+            "right", "rightTop", "rightBottom"
+          ]
+        },
+        "direction": { "enum": ["horizontal", "vertical"] },
+        "maxChecked": { "type": "number" },
+        "allowClear": { "type": "boolean" },
+        "showCount": { "type": "boolean" },
+        "showToggle": { "type": "boolean" },
+
+        "width": { "type": "number", "exclusiveMinimum": 0 },
+        "props": { "type": "object", "description": "逃生舱：直通控件构造函数，内容不校验" }
+      }
+    }
+  }
+}

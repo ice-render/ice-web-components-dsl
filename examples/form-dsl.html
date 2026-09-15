@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 内联图标：零额外文件，也顺手消掉浏览器自动请求 /favicon.ico 的 404 -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2361D9FB'/%3E%3Cg fill='%23ffffff'%3E%3Crect x='7' y='8' width='18' height='4' rx='1.5'/%3E%3Crect x='7' y='15' width='18' height='4' rx='1.5'/%3E%3Crect x='7' y='22' width='10' height='4' rx='1.5'/%3E%3C/g%3E%3C/svg%3E"
+    />
+    <title>ice-web-components-dsl · 表单 DSL</title>
+    <style>
+      :root {
+        --ice: #61d9fb;
+        --ice-deep: #0d7ea8;
+        --line: #e2e8f0;
+        --text: #1f2933;
+        --muted: #6b7785;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #f5f7fa;
+        color: var(--text);
+        font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      }
+      header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+      header h1 { font-size: 16px; margin: 0; }
+      header h1 b { color: var(--ice-deep); }
+      header .hint { font-size: 12px; color: var(--muted); margin-left: auto; }
+      main {
+        display: grid;
+        grid-template-columns: 460px 1fr;
+        gap: 16px;
+        padding: 16px 20px 40px;
+        align-items: start;
+      }
+      .panel {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .panel > .head {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--line);
+        font-size: 12px;
+        color: var(--muted);
+        background: #fafbfc;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel > .head .title { color: var(--text); font-weight: 600; font-size: 13px; }
+      .panel > .head .spacer { margin-left: auto; }
+      textarea {
+        width: 100%;
+        height: 460px;
+        border: none;
+        outline: none;
+        resize: vertical;
+        padding: 12px;
+        font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: #0f172a;
+      }
+      button {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+      button:hover { border-color: var(--ice); color: var(--ice-deep); }
+      button.primary { background: var(--ice); border-color: var(--ice); color: #06414f; font-weight: 600; }
+      #stage { padding: 16px; display: flex; justify-content: center; }
+      canvas { display: block; box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08); border-radius: 8px; }
+      #diagnostics {
+        margin: 0 16px 16px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 1px solid var(--line);
+        font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre-wrap;
+        max-height: 260px;
+        overflow: auto;
+      }
+      #diagnostics .error { color: #b42318; font-weight: 600; }
+      #diagnostics .warning { color: #8a6100; font-weight: 600; }
+      #diagnostics .ok { color: #067647; font-weight: 600; }
+      #values {
+        margin: 0 16px 16px;
+        font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color: var(--ice-deep);
+      }
+      .error-page { color: #b42318; padding: 24px; font: 13px/1.7 ui-monospace, Menlo, monospace; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>ice-web-components-dsl · <b>表单 DSL</b></h1>
+      <span class="hint">改左边 JSON → 点「渲染」。诊断区是给 agent 自修复用的反馈通道。</span>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="head">
+          <span class="title">DSL（JSON）</span>
+          <span class="spacer"></span>
+          <button data-preset="ok">合法</button>
+          <button data-preset="unknownType">类型写错</button>
+          <button data-preset="badOptions">选项有问题</button>
+          <button data-preset="badDep">依赖指向空</button>
+        </div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </section>
+
+      <section class="panel">
+        <div class="head">
+          <span class="title">渲染结果</span>
+          <span class="spacer"></span>
+          <span id="status"></span>
+          <button id="render" class="primary">渲染</button>
+        </div>
+        <div id="stage"><canvas id="form" width="440" height="500"></canvas></div>
+        <div id="diagnostics"></div>
+        <div id="values"></div>
+      </section>
+    </main>
+
+    <!-- UMD 引入顺序不能换：引擎 → 组件库 → 本包 -->
+    <script src="../node_modules/ice-render/dist/index.umd.js"></script>
+    <script src="../node_modules/ice-web-components/dist/index.umd.js"></script>
+    <script src="../dist/index.umd.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+
+      const PRESETS = {
+        ok: {
+          schemaVersion: 1,
+          kind: 'form',
+          title: '泵站参数确认',
+          description: '这三项确认后才会下发控制指令。',
+          fields: [
+            { name: 'station', type: 'text', label: '泵站名称', required: true, maxLength: 20, placeholder: '例如：一号泵站' },
+            {
+              name: 'mode',
+              type: 'select',
+              label: '运行模式',
+              required: true,
+              default: 'auto',
+              options: [
+                { value: 'auto', label: '自动' },
+                { value: 'manual', label: '手动' },
+              ],
+            },
+            { name: 'flow', type: 'number', label: '目标流量 (m³/h)', required: true, min: 0, max: 5000, step: 10, default: 800 },
+          ],
+          submitText: '确认下发',
+        },
+        unknownType: {
+          schemaVersion: 1,
+          kind: 'form',
+          fields: [
+            { name: 'a', type: 'richtext', label: '富文本' },
+            { name: 'b', type: 'number', label: '数值', minLength: 3 },
+          ],
+        },
+        badOptions: {
+          schemaVersion: 1,
+          kind: 'form',
+          fields: [
+            { name: 'mode', type: 'select', label: '运行模式', default: 'auto', options: [{ value: 'on', label: '开' }, { value: 'off', label: '关' }] },
+            { name: 'tags', type: 'checkbox-group', label: '标签', options: [] },
+          ],
+        },
+        badDep: {
+          schemaVersion: 1,
+          kind: 'form',
+          fields: [
+            { name: 'password', type: 'password', label: '密码', required: true },
+            { name: 'confirm', type: 'password', label: '确认密码', dependencies: ['passwrod'] },
+          ],
+        },
+      };
+
+      let current = null;
+      let wired = false;
+
+      function presetFromLocation() {
+        const key = new URLSearchParams(location.search).get('preset');
+        return PRESETS[key] ? key : 'ok';
+      }
+
+      function setPreset(key) {
+        $('editor').value = JSON.stringify(PRESETS[key], null, 2);
+      }
+
+      function showDiagnostics(result) {
+        const lines = [...result.errors, ...result.warnings].map((item) => {
+          const cls = item.severity === 'error' ? 'error' : 'warning';
+          const tag = item.severity === 'error' ? '[错误]' : '[警告]';
+          return '<span class="' + cls + '">' + tag + '</span> ' + item.message + (item.path ? '（' + item.path + '）' : '');
+        });
+        $('diagnostics').innerHTML = lines.length ? lines.join('\n') : '<span class="ok">✓ 校验通过</span>';
+      }
+
+      function render() {
+        $('values').textContent = '';
+        window.__form = null;
+        if (current) {
+          current.destroy();
+          current = null;
+        }
+
+        let dsl;
+        try {
+          dsl = JSON.parse($('editor').value);
+        } catch (err) {
+          $('diagnostics').innerHTML = '<span class="error">[错误]</span> JSON 解析失败：' + err.message;
+          $('status').textContent = '';
+          return;
+        }
+
+        // 先看诊断再决定要不要画 —— 校验器对任何输入都不抛异常
+        const diagnostics = ICEWEBDSL.validateFormDsl(dsl);
+        showDiagnostics(diagnostics);
+        if (!diagnostics.valid) {
+          $('status').textContent = '未渲染（校验不通过）';
+          return;
+        }
+
+        try {
+          current = ICEWEBDSL.renderFormDsl('form', dsl, {
+            onSubmit(values) {
+              $('values').textContent = '提交值：' + JSON.stringify(values);
+            },
+          });
+          $('status').textContent = '已渲染 · 字段 ' + current.compiled.fieldNames.length + ' 个';
+          // 调试 / e2e 用：canvas 里没有 DOM 目标，测试要点中控件就得拿到它的位置
+          window.__form = current;
+          // 画布尺寸是宿主的事：DSL 不管坐标，也不管画布多大
+          current.resize(440, 500);
+        } catch (err) {
+          $('diagnostics').innerHTML = '<span class="error">[错误]</span> ' + err.message;
+          $('status').textContent = '';
+        }
+      }
+
+      document.querySelectorAll('[data-preset]').forEach((button) => {
+        button.addEventListener('click', () => {
+          setPreset(button.dataset.preset);
+          render();
+        });
+      });
+      $('render').addEventListener('click', render);
+
+      setPreset(presetFromLocation());
+      render();
+      wired = true;
+    </script>
+  </body>
+</html>
