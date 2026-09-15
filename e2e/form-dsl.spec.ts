@@ -189,7 +189,7 @@ test('改回合法预设后能重新渲染（旧的实例被收掉）', async ({
 });
 
 /**
- * 表单要**铺满宿主给的宽度**。
+ * 表单要**铺满内容宽度**：既不缩成左边一小块，也不被拉满整张卡片。
  *
  * 这一条是实测缺陷的回归：宿主容器 896 宽时表单只在左边画了 229px，**右边空掉 667px（74%）**。
  * 根因在 DSL 层不在渲染器：宽度在 ICE 里是每个组件自己的属性，没有"父级拉满"的自动传导 ——
@@ -197,7 +197,7 @@ test('改回合法预设后能重新渲染（旧的实例被收掉）', async ({
  * （`ICETextField` 200、`ICEInputNumber` 140…），同一张表单里还互不相同。
  * 见 README §8.1。
  */
-test('表单铺满宿主给的宽度（不是只用左边一小块）', async ({ page }) => {
+test('表单铺满内容宽度（不是只用左边一小块）', async ({ page }) => {
   await page.goto('/examples/form-dsl.html');
   await expect(texts(page).status).toContainText('已渲染');
   // 先等画面真的落下来，否则量到的是一张还没画的空画布
@@ -215,7 +215,34 @@ test('表单铺满宿主给的宽度（不是只用左边一小块）', async ({
 });
 
 /**
- * 容器变窄之后要**重新对齐内容**，不能只改画布。
+ * 宽屏上表单停在 `maxWidth`（默认 640），画布跟着表单走 —— 不是画布宽出一截、右边空一块。
+ *
+ * 这一条管的是"拉伸也要有上限"：把 896 全铺满不是"排满了"，是难看 ——
+ * 一行 896 宽的输入框没人读得过来。同时验证 `result.width` 这个取值器：
+ * 宿主必须能知道表单**最终**多宽，否则它只能拿自己给的宽度去定画布。
+ */
+test('宽屏上表单停在 maxWidth，画布跟表单一样宽', async ({ page }) => {
+  await page.goto('/examples/form-dsl.html');
+  await expect(texts(page).status).toContainText('已渲染');
+  await waitForInk(page);
+
+  const stage = await page.evaluate(() => document.getElementById('stage').clientWidth);
+  const info = await page.evaluate(() => {
+    const canvas = document.getElementById('form') as HTMLCanvasElement;
+    return {
+      canvas: Math.round(canvas.getBoundingClientRect().width),
+      formWidth: Math.round((window as any).__form.width),
+    };
+  });
+
+  // 舞台比 640 宽 —— 否则这条用例什么也没验证
+  expect(stage).toBeGreaterThan(700);
+  expect(info.formWidth, '表单应当停在默认上限 640').toBe(640);
+  expect(info.canvas, '画布宽度要跟着表单走（不然右边会空一块）').toBe(info.formWidth);
+});
+
+/**
+ * 容器尺寸变了要**重新对齐内容**，不能只改画布。
  *
  * 这是 `setWidth()` 那条路径单独的回归：`resize()` 管画布、`setWidth()` 管内容，两件事。
  * 少了它，画布窄了而表单还是原来那么宽 —— 右边被裁掉或又空出来。
@@ -226,8 +253,10 @@ test('窗口变窄后表单跟着重新对齐（不只是画布变窄）', async
   await waitForInk(page);
 
   const wide = await inkBounds(page);
+  expect(wide.right, '宽屏下表单应当停在 640').toBeGreaterThan(600);
 
-  await page.setViewportSize({ width: 900, height: 900 });
+  // 窄到舞台放不下 640 —— 这样表单必须跟着缩
+  await page.setViewportSize({ width: 760, height: 900 });
 
   // `window.resize` → `fit()` 是同步的，但布局/重绘要等一帧，所以轮询而不是赌
   await expect
@@ -235,7 +264,8 @@ test('窗口变窄后表单跟着重新对齐（不只是画布变窄）', async
       message: '缩窄之后表单没有跟着变窄',
       timeout: 5000,
     })
-    .toBeLessThan(wide.right - 50);
+    .toBeLessThan(wide.right - 100);
 
+  // 变窄之后仍然铺满（画布跟着表单走，所以比例应当接近 1）
   expect((await inkBounds(page)).widthRatio).toBeGreaterThan(0.9);
 });

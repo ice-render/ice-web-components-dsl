@@ -78,8 +78,8 @@ ice.addChild(container);
 | --- | --- |
 | `validateFormDsl(dsl)` | **任何输入都不抛异常**。返回 `{ valid, errors, warnings }`，每条诊断带 `severity` / `code` / `message` / `path` |
 | `formatDiagnostics(result)` | 把校验结果转成可读文本 |
-| `compileFormDsl(dsl, opts?)` | → `{ container, form, model, submitButton, fieldNames, getValues, setValues, reset, setWidth, submit, submitAsync, onSubmit, destroy }`。`opts.width` 见 §8.1。校验不过抛 `FormDslCompileError`（带诊断） |
-| `renderFormDsl(target, dsl, opts?)` | 一步到位：建 ICE 实例 + 挂组件 + 接提交。返回 `{ ice, compiled, diagnostics, resize, setWidth, measureContentHeight, destroy }`。`opts.width` 见 §8.1 |
+| `compileFormDsl(dsl, opts?)` | → `{ container, form, model, submitButton, fieldNames, getValues, setValues, reset, setWidth, submit, submitAsync, onSubmit, destroy }`。`opts.width` / `opts.maxWidth` 见 §8.1。校验不过抛 `FormDslCompileError`（带诊断） |
+| `renderFormDsl(target, dsl, opts?)` | 一步到位：建 ICE 实例 + 挂组件 + 接提交。返回 `{ ice, compiled, diagnostics, width, resize, setWidth, measureContentHeight, destroy }`。`width` 是表单**最终**宽度（已夹过 `maxWidth`），见 §8.1 |
 
 ## 4. 字段类型与它们接受的属性
 
@@ -183,14 +183,19 @@ const result = renderFormDsl(canvas, dsl, { width: card.clientWidth });
 const compiled = compileFormDsl(dsl, { width: card.clientWidth });
 ```
 
-不传则退回 `dsl.width`，再退回 `360`。
+不传则退回 `dsl.width`，再退回 `360`。宿主给的宽度会被 **`maxWidth`（默认 640）** 夹住 ——
+把 896 全铺满不是"排满了"，是难看：一行 896 宽的输入框没人读得过来。
+（`maxWidth: Infinity` 就是不设上限；也可以用 `dsl.maxWidth` 在文档里声明。）
+
+**表单最终多宽**读 `result.width` —— 宿主需要它来决定画布/容器多宽。
+拿自己传进去的宽度去定画布就会宽出一截、右边空一块，看起来跟没修一样。
 
 容器尺寸变了要调 `setWidth()` —— **`resize()` 管画布，`setWidth()` 管内容**，两件事都要做：
 
 ```js
 window.addEventListener('resize', () => {
-  result.setWidth(card.clientWidth);   // 表单与所有控件重新对齐
-  result.resize(card.clientWidth, height); // 画布与命中区跟着走
+  result.setWidth(card.clientWidth);   // 表单与控件重新对齐（同样会被 maxWidth 夹住）
+  result.resize(result.width, height); // 画布跟**表单实际宽度**，不是容器宽度
 });
 ```
 
@@ -203,10 +208,18 @@ window.addEventListener('resize', () => {
 
 编译期给的默认规则：
 
-| 布局 | 控件宽度 |
+| 字段类型 | 控件宽度 |
 | --- | --- |
-| `vertical`（默认） | 表单宽度 |
-| `horizontal` | `max(120, 表单宽度 - 80)`，那 80 是 `ICEFormItem` 的默认 `labelWidth`，让给标签 |
+| 除 `number` 以外全部 | 表单宽度（`horizontal` 布局下是 `max(120, 表单宽度 - 80)`，那 80 是 `ICEFormItem` 的默认 `labelWidth`，让给标签） |
+| `number` | **200，不拉伸** |
+
+`number` 是唯一的例外，理由是 `ICEInputNumber` 自己的内部布局：减号贴最左端、数值居中，
+宽度一拉大这两样就天各一方（实测 890px 时看着像坏了）。
+
+反过来，其余类型**必须**拉伸，因为它们的出厂默认是**退化的**：
+`slider` 默认 10px、`checkbox` 默认 0px、`radio-group` 默认 35px ——
+不给宽度就会画出一个看不见的控件。（这一条是实测出来的：第一版只让"文本类"拉伸，
+结果滑块变成 10px 宽的一条。）
 
 逐字段写的 `width` 优先级最高，且 `setWidth()` **不会**动它 —— 显式意图不该被重排抹掉。
 
@@ -286,14 +299,18 @@ npm run verify        # types:check + build + jest
 npm run verify:full   # 上面 + playwright（示例页真机冒烟）
 ```
 
-当前规模：**70 单测 / 3 套件**，**9 e2e / 1 spec**。
+当前规模：**77 单测 / 3 套件**，**10 e2e / 1 spec**。
 
 示例页 e2e 的判据不是"按钮存在"，而是：画布上真的有墨、
 **真实点中画布上的提交按钮**能走完校验 → 提交这条链、诊断里带可操作的替代信息。
 
-其中两例按**着墨包围盒**判排布（"表单铺满宿主给的宽度" / "窗口变窄后表单跟着重新对齐"）——
-`countInk` 那类"画了没有"的断言抓不到"画出来了但只占左边一小块"：
-着墨量照样几千。这一组是实测缺陷的回归，见 §8.1。
+其中三例按**着墨包围盒**判排布（"表单铺满内容宽度" / "宽屏上停在 maxWidth" /
+"窗口变窄后跟着重新对齐"）—— `countInk` 那类"画了没有"的断言抓不到
+"画出来了但只占左边一小块"：着墨量照样几千。这一组是实测缺陷的回归，见 §8.1。
+
+> 判据要**两边都判**。"占画布 x%" 这类单边判据对"把整张卡片全铺满"照样成立，
+> 所以那两条用例同时断言"不缩成一小块"**和**"不拉满整张卡片"。
+> 这一点是 A/B 时发现的：故意把 `maxWidth` 传成 `Infinity`，用例居然还是绿的。
 
 > 知道这个数字从哪来很重要：宽度这条链上没有一处会**报错**。
 > 修复前宿主 896 宽、表单只画了 229px —— 校验通过、编译通过、渲染成功，

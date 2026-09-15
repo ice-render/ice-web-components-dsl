@@ -39,14 +39,14 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 | `kind` | **是** | 当前只支持 `"form"` |
 | `title` / `description` | 否 | 标题与副标题。`description` 用来解释"为什么要填这些" |
 | `layout` | 否 | `"vertical"`（默认，标签在上）或 `"horizontal"`（标签在左） |
-| `width` | 否 | 表单宽度（CSS 像素）。**一般不用写** —— 见下面的说明 |
+| `width` / `maxWidth` | 否 | 宽度（CSS 像素）。**一般不用写** —— 见下面的说明 |
 | `gap` | 否 | 字段间距，默认 12 |
 | `fields` | **是** | 字段数组，**不能为空** |
 | `submitText` | 否 | 提交按钮文案，默认「提交」。传 `null` 表示不生成提交按钮 |
 
-> **别写 `width`。** 表单多宽取决于宿主把它放在哪儿（卡片多宽、面板多宽），
-> 宿主会通过 `renderFormDsl(target, dsl, { width })` 告诉渲染器 —— 你写的那个值会被覆盖。
-> 留空即可：控件会跟着表单铺满整宽。
+> **别写 `width` / `maxWidth`。** 表单多宽取决于宿主把它放在哪儿（卡片多宽、面板多宽），
+> 宿主会通过 `renderFormDsl(target, dsl, { width })` 告诉渲染器 —— 你写的值会被覆盖。
+> 留空即可：控件会跟着表单铺满内容宽度（默认上限 640，由渲染器夹住）。
 > 只有"某个字段就该比别的窄"这种**逐字段**的意图才值得写 `fields[n].width`。
 
 > **没有 `left` / `top`。** 布局由 `layout` 与引擎的箱式布局决定 —— 一旦放开坐标，

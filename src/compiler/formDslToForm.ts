@@ -115,19 +115,36 @@ function toNativeRules(field: FormDslField): any[] {
 }
 
 /**
+ * 哪些字段类型**不**跟着表单宽度拉伸，以及它们该多宽。
+ *
+ * **只有数值这一类**，理由是 `ICEInputNumber` 自己的内部布局：减号贴最左端、数值居中，
+ * 宽度一拉大这两样就天各一方（实测 890px 时看着像坏了）—— 数值输入该是它自己那个尺寸。
+ *
+ * 反过来，其余类型都必须拉伸，因为它们的出厂默认是**退化的**：
+ * `slider` 默认 10px、`checkbox` 默认 0px、`radio-group` 默认 35px ——
+ * 不给宽度就会画出一个看不见的控件（实测：不拉伸时滑块只有 10px）。
+ * 而文本类的输入框太窄本身就是问题：它装的是句子。
+ *
+ * 这就是"意图级默认"要编码的东西 —— 模型不该为这种事写宽度。
+ */
+const FIXED_WIDTH_TYPES: Partial<Record<FormDslFieldType, number>> = { number: 200 };
+
+/**
  * 一个字段 → 一个控件实例。
  *
  * 这里就是"一处声明、两处生效"落地的地方：
  * - `number` / `slider` 的 `min` / `max` 既进控件（步进夹取），也进规则（校验）；
  * - 文本类的 `maxLength` 既限制输入长度，也进规则。
  * 原生路径这两件事互不相干，模型只会写其中一个。
+ *
+ * 宽度同理，也是"一处声明两处生效"的一种：不写宽度时按**类型**给意图级默认，
+ * 而不是让每个控件落到各自的出厂默认（ICETextField 200、ICEInputNumber 140、
+ * ICESelect 200…）—— 实测那样同一张表单里几个控件宽度互不相同，右边能空掉 74%。
+ * `field.width` 仍然可以逐字段覆盖。
  */
-function createControl(field: FormDslField, defaultWidth: number): any {
-  // **意图级默认**：竖向表单里控件应当撑满表单宽度。
-  // 不这么做的话每个控件会落到各自的出厂默认（ICETextField 200、ICEInputNumber 140、
-  // ICESelect 200…），同一张表单里几个控件宽度互不相同 —— 实测右边能空掉 74%。
-  // `field.width` 仍然可以逐字段覆盖。
-  const width = field.width ?? defaultWidth;
+function createControl(field: FormDslField, stretchWidth: number): any {
+  const fixed = FIXED_WIDTH_TYPES[field.type];
+  const width = field.width ?? (fixed === undefined ? stretchWidth : fixed);
   const passthrough = field.props || {};
   const base: Record<string, any> = { value: undefined, width, ...passthrough };
   if (field.placeholder !== undefined) base.placeholder = field.placeholder;
@@ -230,9 +247,34 @@ export interface CompileFormOptions {
    * 宿主能给的宽度（CSS 像素）。
    *
    * 不传就用 `dsl.width`，再退回 360。**宿主应该传** —— 表单多宽取决于它被放哪儿，
-   * 而 DSL 不知道这件事。传了之后表单与所有控件会一起对齐到这个宽度。
+   * 而 DSL 不知道这件事。
    */
   width?: number;
+  /**
+   * 表单能用的**最大**宽度，默认 640（也可以用 `dsl.maxWidth` 声明）。
+   *
+   * 宿主给的宽度会被它夹住：一个 896 宽的抽屉里不该出现 896 宽的输入框。
+   * 传 `Infinity` 就是不设上限。
+   */
+  maxWidth?: number;
+}
+
+/** 表单宽度的上限：一行文本没人读得过来。 */
+export const DEFAULT_FORM_MAX_WIDTH = 640;
+/** 再窄也要能放下一个输入框。 */
+const MIN_FORM_WIDTH = 240;
+
+/** 正数才算数（0 / NaN / 负数当成"没给"）。`Infinity` 是合法的 —— 表示"不设上限"。 */
+function pickPositive(value: number | undefined): number | undefined {
+  if (value === Infinity) return Infinity;
+  return typeof value === 'number' && isFinite(value) && value > 0 ? value : undefined;
+}
+
+/** 把"宿主能给的宽度"夹到 `[MIN_FORM_WIDTH, maxWidth]`。 */
+function clampWidth(width: number, maxWidth: number): number {
+  const w = pickPositive(width) ?? MIN_FORM_WIDTH;
+  const upper = Math.max(MIN_FORM_WIDTH, maxWidth);
+  return Math.min(Math.max(w, MIN_FORM_WIDTH), upper);
 }
 
 export function compileFormDsl(dsl: FormDslDocument, options: CompileFormOptions = {}): CompiledForm {
@@ -245,14 +287,25 @@ export function compileFormDsl(dsl: FormDslDocument, options: CompileFormOptions
   }
 
   const gap = dsl.gap ?? 12;
-  const formWidth = options.width ?? dsl.width ?? 360;
+  const maxWidth = pickPositive(options.maxWidth) ?? pickPositive(dsl.maxWidth) ?? DEFAULT_FORM_MAX_WIDTH;
+  const formWidth = clampWidth(options.width ?? dsl.width ?? 360, maxWidth);
   const layout = dsl.layout ?? 'vertical';
   // 横向布局时标签占左边，控件区要相应让出来（80 是 ICEFormItem 的默认 labelWidth）
   const LABEL_WIDTH = 80;
-  const controlWidth = layout === 'horizontal' ? Math.max(120, formWidth - LABEL_WIDTH) : formWidth;
+  const stretchWidth = (w: number) =>
+    layout === 'horizontal' ? Math.max(120, w - LABEL_WIDTH) : w;
   const fieldNames: string[] = [];
   /** 显式写了 `width` 的字段名：`setWidth` 时不动它们。 */
   const explicitWidths = new Set(dsl.fields.filter((f) => f.width !== undefined).map((f) => f.name));
+  /**
+   * 字段名 → 它的控件是不是"跟着表单宽度拉伸"的那一类。
+   *
+   * `setWidth` 要按同一套判据走，所以编译期就得记下来 —— 靠 `field.type` 现算也行，
+   * 但那样两处判据会各自漂移，而漂移的症状是"编译时对、resize 之后错"，最难查。
+   */
+  const stretchByName = new Map<string, boolean>(
+    dsl.fields.map((f) => [f.name, FIXED_WIDTH_TYPES[f.type] === undefined])
+  );
 
   const form = new ICEForm({ width: formWidth, gap });
   const items = dsl.fields.map((field) => {
@@ -260,7 +313,7 @@ export function compileFormDsl(dsl: FormDslDocument, options: CompileFormOptions
     return new ICEFormItem({
       name: field.name,
       label: field.label ?? field.name,
-      control: createControl(field, controlWidth),
+      control: createControl(field, stretchWidth(formWidth)),
       rules: toNativeRules(field),
       ...(field.dependencies ? { dependencies: field.dependencies } : {}),
       // 表单项的宽度显式给：不给的话 ICEFormItem 会从控件自己的宽度反推（`max(控件宽, 120)`），
@@ -326,26 +379,37 @@ export function compileFormDsl(dsl: FormDslDocument, options: CompileFormOptions
       };
     },
     /**
-     * 把表单与**所有控件**重新对齐到一个新宽度。
+     * 把表单与控件重新对齐到一个新宽度。
      *
-     * 宿主在容器尺寸变化时调它。之所以要一层层写下去：宽度在 ICE 里是每个组件自己的属性，
-     * 没有"父级拉满"的自动传导（见 compileFormDsl 里那段注释），所以必须显式对齐整棵树。
+     * `width` 是**宿主能给多少**，不是最终宽度 —— 还会被 `maxWidth` 夹住（见
+     * `compileFormDsl` 的注释）。夹这一步必须在这里也做一遍，否则宿主 resize 一放大，
+     * 编译期刚夹好的上限就被冲掉了。
+     *
+     * 之所以要一层层写下去：宽度在 ICE 里是每个组件自己的属性，没有"父级拉满"的自动传导，
+     * 所以必须显式对齐整棵树。而对齐的**范围**同样要按类型区分：只有拉伸型的控件跟着变，
+     * 数值/开关/选择组保持自己的尺寸（理由见 `STRETCH_TYPES`）。
      */
     setWidth(width: number) {
-      if (!(width > 0)) return;
-      const nextControlWidth = layout === 'horizontal' ? Math.max(120, width - LABEL_WIDTH) : width;
-      container.setState({ width });
-      form.setState({ width });
+      // 非法值**什么都不做**（而不是夹到下限去）。两种情形不一样：
+      // 编译期必须选一个尺寸（容器 0 宽时用 `MIN_FORM_WIDTH` 兜底），
+      // 而 setWidth 是"容器尺寸变了"的通知 —— 尺寸为 0 通常是页签隐藏、布局还没就绪，
+      // 那时候最该做的是**别动**，等真的有尺寸了再调一次。
+      const requested = pickPositive(width);
+      if (requested === undefined) return;
+      const next = clampWidth(requested, maxWidth);
+      const nextStretch = stretchWidth(next);
+      container.setState({ width: next });
+      form.setState({ width: next });
+      titleNode?.setState({ width: next });
+      descNode?.setState({ width: next });
       for (const item of form.getItems() as any[]) {
-        item.setState({ width });
-        const control = item.getControl?.();
+        item.setState({ width: next });
+        const name = item.getName?.() ?? '';
         // 逐字段覆盖过宽度的（`field.width`）不跟着变 —— 那是显式意图
-        if (control && !explicitWidths.has(item.getName?.() ?? '')) {
-          control.setState({ width: nextControlWidth });
-        }
+        if (explicitWidths.has(name)) continue;
+        if (!stretchByName.get(name)) continue;
+        item.getControl?.()?.setState({ width: nextStretch });
       }
-      titleNode?.setState({ width });
-      descNode?.setState({ width });
       form.doLayout();
       container.doLayout();
     },

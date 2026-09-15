@@ -33,6 +33,7 @@ const ROOT_FIELDS = [
   'description',
   'layout',
   'width',
+  'maxWidth',
   'gap',
   'fields',
   'submitText',
@@ -405,7 +406,7 @@ export function validateFormDsl(dsl: any): FormDslValidationResult {
   if (dsl.layout !== undefined && dsl.layout !== 'vertical' && dsl.layout !== 'horizontal') {
     fail('invalid-layout', `layout 只能是 'vertical' 或 'horizontal'，当前是「${String(dsl.layout)}」。`, 'layout');
   }
-  for (const key of ['width', 'gap'] as const) {
+  for (const key of ['width', 'maxWidth', 'gap'] as const) {
     if (dsl[key] !== undefined && !(isFiniteNumber(dsl[key]) && dsl[key] > 0)) {
       warn('invalid-number', `${key} 应该是正数，当前是「${String(dsl[key])}」会被忽略。`, key);
     }

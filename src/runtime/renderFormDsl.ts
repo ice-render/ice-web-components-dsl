@@ -22,11 +22,21 @@ export interface RenderFormDslOptions {
    * 再退回 360 —— 那时如果宿主容器比它宽，右边会空出一大片。
    */
   width?: number;
+  /** 表单能用的**最大**宽度，默认 640（也可以用 `dsl.maxWidth` 声明）。至少比 `width` 大才有意义。 */
+  maxWidth?: number;
 }
 
 export interface RenderFormDslResult {
   ice: ICE;
   compiled: CompiledForm;
+  /**
+   * 表单**实际**用的宽度（CSS 像素）—— 已经被 `maxWidth` 夹过。
+   *
+   * 宿主拿它来决定"画布/容器该多宽"。不提供这个值的话，宿主只能用自己给的宽度去定画布，
+   * 而 DSL 悄悄夹到了 640 —— 于是画布比表单宽出一截，看起来像右边空了一块。
+   * 是个取值器：`setWidth()` 之后读到的就是新值。
+   */
+  readonly width: number;
   /** 校验结果（含 warning）：编译能过但值得提醒的地方都在这里。 */
   diagnostics: FormDslValidationResult;
   /**
@@ -58,7 +68,7 @@ export function renderFormDsl(
   options: RenderFormDslOptions = {}
 ): RenderFormDslResult {
   const diagnostics = validateFormDsl(dsl);
-  const compiled = compileFormDsl(dsl, { width: options.width });
+  const compiled = compileFormDsl(dsl, { width: options.width, maxWidth: options.maxWidth });
 
   const ice = new ICE();
   ice.init(target as any, { dpr: options.dpr ?? (globalThis as any).devicePixelRatio ?? 1 });
@@ -70,6 +80,9 @@ export function renderFormDsl(
     ice,
     compiled,
     diagnostics,
+    get width() {
+      return Number((compiled.container as any)?.state?.width) || 0;
+    },
     resize(cssWidth, cssHeight) {
       ice.fitCanvasToDisplaySize(cssWidth, cssHeight);
     },

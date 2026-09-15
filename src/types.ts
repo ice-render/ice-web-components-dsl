@@ -171,8 +171,16 @@ export interface FormDslDocument {
   description?: string;
   /** 标签在字段上方（默认）还是左侧。 */
   layout?: 'vertical' | 'horizontal';
-  /** 表单宽度（CSS 像素）。不给则由宿主决定。 */
+  /** 表单宽度（CSS 像素）。不给则由宿主决定（见 `maxWidth`）。 */
   width?: number;
+  /**
+   * 表单**最大**宽度（CSS 像素），默认 640。
+   *
+   * 宿主给的宽度会被它夹住。为什么需要：稿子里的卡片可能有 896 宽，但一个 896 宽的
+   * 「泵站名称」输入框不是"排满了"，是难看 —— 一行文本没人读得过来。
+   * 表单该填满的是**内容区**，不是一个抽屉的物理宽度。
+   */
+  maxWidth?: number;
   /** 字段之间的间距。 */
   gap?: number;
   fields: FormDslField[];

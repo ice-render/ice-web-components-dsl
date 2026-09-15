@@ -12,7 +12,8 @@
     "title": { "type": "string" },
     "description": { "type": "string", "description": "标题下的一句话说明" },
     "layout": { "enum": ["vertical", "horizontal"], "description": "标签在上（默认）或左侧" },
-    "width": { "type": "number", "exclusiveMinimum": 0, "description": "表单宽度（CSS 像素），默认 360" },
+    "width": { "type": "number", "exclusiveMinimum": 0, "description": "宿主给的宽度不够时才用这个（宿主会覆盖）。不传退回 360" },
+    "maxWidth": { "type": "number", "exclusiveMinimum": 0, "description": "表单最大宽度，默认 640。宿主给的宽度会被它夹住" },
     "gap": { "type": "number", "exclusiveMinimum": 0, "description": "字段间距，默认 12" },
     "submitText": {
       "type": ["string", "null"],
