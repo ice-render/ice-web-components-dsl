@@ -8,7 +8,7 @@
  * **不做坐标摆位**：DSL 里根本没有 `left` / `top`，纵向堆叠交给引擎的箱式布局。
  * 一旦放开坐标，模型就会产出互相重叠的控件。
  */
-import { ICEBoxLayout } from 'ice-render';
+import { ICEBoxLayout, ICEGroup } from 'ice-render';
 import {
   ICEButton,
   ICECheckBox,
@@ -17,7 +17,6 @@ import {
   ICEForm,
   ICEFormItem,
   ICEInputNumber,
-  ICEPanel,
   ICEPasswordField,
   ICERadioGroup,
   ICESelect,
@@ -44,7 +43,7 @@ export class FormDslCompileError extends Error {
 
 export interface CompiledForm {
   /** 外层容器（标题 + 说明 + 表单 + 提交按钮）。把它 `ice.addChild()` 进去。 */
-  container: ICEPanel;
+  container: ICEGroup;
   form: ICEForm;
   model: ICEFormModel;
   /** `submitText: null` 时为 null（宿主自己接管提交）。 */
@@ -246,7 +245,11 @@ export function compileFormDsl(dsl: FormDslDocument): CompiledForm {
   form.addItems(items);
 
   // ---- 外层容器：标题 / 说明 / 表单 / 提交按钮，纵向堆叠 ----
-  const container = new ICEPanel({ width: formWidth, fill: true });
+  //
+  // 用 `ICEGroup` 而不是 `ICEPanel`：Panel 是"卡片底座"，它会**强制** fill + stroke + 阴影，
+  // 而它自己的高度默认很小 —— 于是那块背景会被画成压在第一个子节点身后的一条横杠
+  // （smoke 时肉眼可见）。这里的容器是**纯布局容器**，外观交给宿主（比如冰蓝竖线那种外框）。
+  const container = new ICEGroup({ width: formWidth });
   container.setLayout(new ICEBoxLayout({ axis: 'y', gap }));
   if (dsl.title) {
     container.addChild(new ICETypography({ text: dsl.title, level: 4, width: formWidth }));

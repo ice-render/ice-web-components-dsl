@@ -61,10 +61,25 @@ export function renderFormDsl(
     resize(cssWidth, cssHeight) {
       ice.fitCanvasToDisplaySize(cssWidth, cssHeight);
     },
+    /**
+     * 内容实际需要的高度。
+     *
+     * 先问布局器（`getPreferredSize`），它答不上来就按子节点的下沿自己算 ——
+     * 应用层不该去猜 `ICEFormItem` 的标签行高与间距，那是上游的排版逻辑。
+     */
     measureContentHeight() {
-      const box = (compiled.container as any).getMinBoundingBox?.();
-      const height = box && (box.height ?? box[3]);
-      return typeof height === 'number' && isFinite(height) ? height : 0;
+      const container: any = compiled.container;
+      const preferred = container.getPreferredSize?.();
+      if (Array.isArray(preferred) && isFinite(preferred[1]) && preferred[1] > 0) {
+        return preferred[1];
+      }
+      let bottom = 0;
+      for (const child of container.childNodes || []) {
+        const top = Number(child?.state?.top) || 0;
+        const height = Number(child?.state?.height) || 0;
+        bottom = Math.max(bottom, top + height);
+      }
+      return bottom;
     },
     destroy() {
       compiled.destroy();
