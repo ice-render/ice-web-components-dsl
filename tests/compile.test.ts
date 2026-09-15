@@ -7,7 +7,7 @@
  * 然后"填了 10 却不报错"。DSL 里写一次 `min: 18` 两边都有。
  */
 import { compileFormDsl, FormDslCompileError } from '../src/compiler/formDslToForm';
-import type { FormDslDocument } from '../src/types';
+import { FORM_DSL_FIELD_TYPES, type FormDslDocument } from '../src/types';
 
 function doc(overrides: Partial<FormDslDocument> = {}): FormDslDocument {
   return {
@@ -449,3 +449,156 @@ describe('表单行为', () => {
     compiled.destroy();
   });
 });
+
+/**
+ * 第二批（0.3.0）：9 个新字段类型 + 选项归一化。
+ *
+ * 这一组最要紧的不是"能造出控件"，是**归一化**：库里不同组件对"选项"的叫法与形状都不一样
+ * （`colors: string[]` / `options: string[]` / `nodes: {key,label}` / `dataSource`），
+ * 那些差别都由编译期消化掉 —— 模型只写 `options`。
+ *
+ * 证据来源：`tests/field-values.test.ts`（运行时探测出来的取值行为）。
+ */
+describe('第二批字段类型', () => {
+  const one = (field: any, options: any = {}) =>
+    compileFormDsl({ schemaVersion: 1, kind: 'form', fields: [field] } as any, options);
+
+  it('`color` —— 组件收的是**裸颜色字符串**，不是 {value,label} 对象', () => {
+    const c: any = one({ name: 'brand', type: 'color', options: ['#61D9FB', '#FFFFFF'] });
+    const ctl = controlOf(c, 0);
+    // 这条**必须**用公开 API 验，不能只断言传进去的数组：
+    // 传 `{value,label}` 对象时组件不会报错，色块会画成**空白** ——
+    // 这个 bug 就是靠真去浏览器里看才发现的（"文档即契约"那套测试只验 DSL 合法）。
+    // `getSwatchNode(色值)` 能取到节点，说明这个颜色真的进了色板。
+    expect(ctl.getSwatchNode('#61D9FB')).toBeTruthy();
+    expect(ctl.getSwatchNode('#FFFFFF')).toBeTruthy();
+    expect(ctl.getSwatchNode('#000000')).toBeFalsy();
+    // 两行八列那种也没问题：行数由 colors.length / columns 算
+    expect(ctl.getRowCount()).toBeGreaterThan(0);
+    c.destroy();
+  });
+
+  it('`color` 也接受对象写法（模型不必为这个差别换写法）', () => {
+    const c: any = one({
+      name: 'brand',
+      type: 'color',
+      options: [{ value: '#61D9FB', label: '冰蓝' }],
+    });
+    expect(controlOf(c, 0).getSwatchNode('#61D9FB')).toBeTruthy();
+    c.destroy();
+  });
+
+  it('`autocomplete` —— 候选是**裸文本数组**（不是 {value,label} 对象）', () => {
+    const c: any = one({ name: 'kw', type: 'autocomplete', options: ['泵站', '阀门'] });
+    // 与 color 同一个坑：`options: string[]` 要的是文本本身。
+    // 传对象进去候选会显示成 [object Object]（不报错）。
+    //
+    // 读 `allOptions` 而不是 `options`：`ICEAutoComplete` 把候选存在这个字段里，
+    // 而且没有公开取值器（`getVisibleOptions()` 只在浮层打开时才有内容）。
+    // 上游一旦改名这条会**响亮地**变红（读到 undefined），不会静默通过。
+    expect(controlOf(c, 0).allOptions).toEqual(['泵站', '阀门']);
+    c.destroy();
+  });
+
+  it('`rate` —— `max` 同时是"满分几颗星"与校验上限（一处声明两处生效）', () => {
+    const c: any = one({ name: 'score', type: 'rate', max: 5, min: 2 });
+    expect(controlOf(c, 0).count).toBe(5);
+    const rule = c.model.getField('score')!.rules![0];
+    expect(rule.max).toBe(5);
+    expect(rule.min).toBe(2);
+    c.destroy();
+  });
+
+  it('`rate` 不被拉伸（它没有宽度这个概念，传宽度是塞一个它不认识的键）', () => {
+    const c: any = one({ name: 'score', type: 'rate' }, { width: 600 });
+    // `ICERate` 的 `ICERateOptions` 里**没有 width**，所以它保持基类给的默认尺寸。
+    // 断言写成"!= 宿主给的宽度"而不是"=== undefined"：基类会给默认值，
+    // 而这里真正要守的是"没被拉伸"。
+    expect((controlOf(c, 0).state as any).width).not.toBe(600);
+    // 但它所在的**行**还是满宽 —— 行宽是布局，与控件自己的尺寸无关
+    expect((itemOf(c, 0).state as any).width).toBe(600);
+    c.destroy();
+  });
+
+  it('`time` —— format 是字符串联合（与 date 的 format 是函数正好相反）', () => {
+    const c: any = one({ name: 't', type: 'time', format: 'HH:mm' });
+    expect(controlOf(c, 0).format).toBe('HH:mm');
+    c.destroy();
+  });
+
+  it('`segmented` —— 选项与既有形状同形', () => {
+    const c: any = one({ name: 's', type: 'segmented', options: [{ value: 'a' }, { value: 'b', label: '乙' }] });
+    expect(controlOf(c, 0).options).toEqual([
+      { value: 'a', label: 'a' },
+      { value: 'b', label: '乙' },
+    ]);
+    c.destroy();
+  });
+
+  it('`cascader` —— 嵌套 children 会被递归归一化，label 逐层兜底', () => {
+    const c: any = one({
+      name: 'region',
+      type: 'cascader',
+      options: [{ value: 'zj', children: [{ value: 'hz' }, { value: 'nb', label: '宁波' }] }],
+    });
+    expect(controlOf(c, 0).options).toEqual([
+      {
+        value: 'zj',
+        label: 'zj',
+        children: [
+          { value: 'hz', label: 'hz' },
+          { value: 'nb', label: '宁波' },
+        ],
+      },
+    ]);
+    c.destroy();
+  });
+
+  it('`tree-select` —— 节点的键名是 `key`，由编译期从 `value` 映射过去', () => {
+    const c: any = one({
+      name: 'node',
+      type: 'tree-select',
+      options: [{ value: 'zj', children: [{ value: 'hz', label: '杭州' }] }],
+    });
+    expect(controlOf(c, 0).nodes).toEqual([
+      {
+        key: 'zj',
+        label: 'zj',
+        children: [{ key: 'hz', label: '杭州' }],
+      },
+    ]);
+    c.destroy();
+  });
+
+  it('`transfer` —— 候选映射成 `dataSource`（key/**title**），默认值走 `targetKeys`', () => {
+    const c: any = one({
+      name: 'picked',
+      type: 'transfer',
+      options: ['a', 'b'],
+      default: ['b'],
+    });
+    const ctl = controlOf(c, 0);
+    // 注意是 `title` 不是 `label` —— `ICETransferItem` 的键名与其它组件都不一样。
+    // 第一版用 `{key,label}` 代它，穿梭框里**只有复选框没有文字**（`title: undefined`
+    // 是合法的，类型也不报错）—— 靠真去浏览器里看才发现的。
+    expect(ctl.dataSource).toEqual([
+      { key: 'a', title: 'a' },
+      { key: 'b', title: 'b' },
+    ]);
+    expect(ctl.getFormValue()).toEqual(['b']);
+    c.destroy();
+  });
+
+  it('`date-range` —— 默认值是两头齐全的元组，直接进组件', () => {
+    const c: any = one({ name: 'span', type: 'date-range', default: ['2026-01-01', '2026-01-31'] });
+    expect(controlOf(c, 0).getFormValue()).toEqual(['2026-01-01', '2026-01-31']);
+    c.destroy();
+  });
+
+  it('`select` 多选时默认值是数组（值形状是「类型 + 属性」的函数，不是类型的函数）', () => {
+    const c: any = one({ name: 'ch', type: 'select', mode: 'multiple', options: ['a', 'b'], default: ['a'] });
+    expect(controlOf(c, 0).getFormValue()).toEqual(['a']);
+    c.destroy();
+  });
+});
+

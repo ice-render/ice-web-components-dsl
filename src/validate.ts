@@ -21,6 +21,8 @@ import {
   NUMERIC_FIELD_TYPES,
   OPTION_FIELD_TYPES,
   TEXT_FIELD_TYPES,
+  TREE_OPTION_FIELD_TYPES,
+  fieldValueShape,
   type FormDslDiagnostic,
   type FormDslFieldType,
   type FormDslValidationResult,
@@ -72,7 +74,30 @@ const TYPE_FIELD_KEYS: Record<FormDslFieldType, string[]> = {
   'checkbox-group': ['options', 'direction', 'maxChecked'],
   select: ['options', 'mode', 'showSearch'],
   date: ['placement'],
+  // ---- 第二批 ----
+  color: ['options'],
+  /** `max` = 满分几颗星（会映射到组件的 `count`，同时也进规则）。 */
+  rate: [],
+  time: ['format'],
+  segmented: ['options', 'block'],
+  autocomplete: ['options'],
+  cascader: ['options', 'separator'],
+  'tree-select': ['options', 'mode', 'showSearch'],
+  transfer: ['options'],
+  'date-range': [],
 };
+
+/**
+ * `mode` 的合法取值**按字段类型不同** —— 所以是一张表而不是一个联合类型。
+ * `select` 多一个 `tags`（可以创造候选里没有的取值），`tree-select` 没有。
+ */
+const MODE_VALUES: Partial<Record<FormDslFieldType, string[]>> = {
+  select: ['single', 'multiple', 'tags'],
+  'tree-select': ['single', 'multiple'],
+};
+
+/** `time` 的 `format` 合法取值。 */
+const TIME_FORMATS = ['HH:mm:ss', 'HH:mm'];
 
 /** 浮层位置。与 `ICEOverlayPlacement` 保持一致 —— 在这里校验而不是重新声明联合类型，
  *  这样漂移会被诊断抓到，而且报错信息能直接把合法值列给模型。 */
@@ -103,6 +128,106 @@ function compilePattern(pattern: any): { re?: RegExp; error?: string } {
   } catch (err) {
     return { error: `pattern 不是合法正则：${(err as Error).message}` };
   }
+}
+
+/**
+ * 校验一份选项列表，并把**可选取值**收集进 `leafValues`。
+ *
+ * 两个容易搞错的点：
+ *
+ * 1. **裸字符串是合法的写法**：`"options": ["#61D9FB", "#fff"]`。库里不同控件要的形状
+ *    不一样（`colors: string[]` / `options: string[]` / `{value,label}[]`），
+ *    让模型记住哪个是哪个就是在收"它记不住"的税 —— 归一化由编译期做。
+ * 2. **树的叶子与节点不是一回事**：`cascader` **只能选叶子**（点叶子才定值），
+ *    而 `tree-select` **任何节点都能选**。所以 `leafValues` 要按类型决定收什么 ——
+ *    否则诊断会说"可用取值：浙江"（那是个永远选不中的值）。
+ */
+function checkOptionList(
+  options: any[],
+  at: string,
+  treeish: boolean,
+  seen: Map<string, number>,
+  leafValues: string[],
+  fail: (code: string, message: string, path?: string) => void,
+  warn: (code: string, message: string, path?: string) => void
+): void {
+  options.forEach((option: any, i: number) => {
+    const optionAt = `${at}[${i}]`;
+    if (typeof option === 'string') {
+      if (option === '') {
+        fail('option-missing-value', '选项不能是空字符串。', optionAt);
+        return;
+      }
+      if (seen.has(option)) {
+        fail('duplicate-option-value', `选项「${option}」重复了（第 ${seen.get(option)} 项已经用过）。`, optionAt);
+      } else {
+        seen.set(option, i);
+      }
+      leafValues.push(option);
+      return;
+    }
+    if (!isPlainObject(option)) {
+      fail('option-invalid', '选项必须是对象（形如 { value, label }）或字符串。', optionAt);
+      return;
+    }
+    if (option.value === undefined || option.value === null || option.value === '') {
+      fail('option-missing-value', '选项缺少 value。', optionAt);
+      return;
+    }
+    if (typeof option.value !== 'string') {
+      fail('option-value-not-string', `选项的 value 必须是字符串（控件取值按字符串比对），当前是 ${typeof option.value}。`, optionAt);
+      return;
+    }
+    if (seen.has(option.value)) {
+      fail('duplicate-option-value', `选项 value「${option.value}」重复了（第 ${seen.get(option.value)} 项已经用过）。`, optionAt);
+    } else {
+      seen.set(option.value, i);
+    }
+
+    const children = option.children;
+    if (children !== undefined) {
+      if (!treeish) {
+        warn(
+          'options-not-allowed',
+          `「」的选项不支持 children（只有级联 / 树需要嵌套），这一层会被忽略。`.replace('「」', '本类型'),
+          `${optionAt}.children`
+        );
+      } else if (!Array.isArray(children)) {
+        fail('invalid-options', `children 必须是数组。`, `${optionAt}.children`);
+      } else if (children.length === 0) {
+        warn('empty-options', 'children 是空数组，这一项会被当成叶子。', `${optionAt}.children`);
+      } else {
+        checkOptionList(children, `${optionAt}.children`, true, seen, leafValues, fail, warn);
+      }
+    }
+
+    // 叶子才收；cascader 只认叶子，tree-select 任何节点都能选 —— 后者在下面补
+    if (!Array.isArray(children) || children.length === 0) leafValues.push(option.value);
+    else if (!treeish) leafValues.push(option.value);
+  });
+}
+
+/**
+ * 一个字段的 `options` → **可选取值**列表（用于 `default` 的诊断文案）。
+ * 树只收叶子（`cascader` 的语义），扁平列表全收。
+ */
+function optionValueList(options: any, type: FormDslFieldType): string[] {
+  if (!Array.isArray(options)) return [];
+  const out: string[] = [];
+  const walk = (list: any[], leavesOnly: boolean) => {
+    for (const o of list) {
+      if (typeof o === 'string') {
+        out.push(o);
+        continue;
+      }
+      if (!isPlainObject(o) || typeof o.value !== 'string') continue;
+      const hasChildren = Array.isArray(o.children) && o.children.length > 0;
+      if (!leavesOnly || !hasChildren) out.push(o.value);
+      if (hasChildren) walk(o.children, leavesOnly);
+    }
+  };
+  walk(options, TREE_OPTION_FIELD_TYPES.includes(type));
+  return out;
 }
 
 /** 校验一个“规则对象”（shorthand 或 `rules[]` 里的一项）的声明式形状。 */
@@ -221,39 +346,22 @@ function checkField(
 
   // ---- options ----
   const needsOptions = knownType && OPTION_FIELD_TYPES.includes(type as FormDslFieldType);
+  const leafValues: string[] = [];
   if (needsOptions) {
     if (field.options === undefined) {
       fail(
         'options-required',
-        `「${type}」是选项型字段，必须提供 options（形如 [{ value, label }]）。`,
+        `「${type}」是选项型字段，必须提供 options。` +
+          '两种写法都行：[{ value, label }] 或直接 ["a", "b"]（后者显示文案就用取值本身）。',
         `${at}.options`
       );
     } else if (!Array.isArray(field.options)) {
-      fail('invalid-options', `options 必须是数组（形如 [{ value, label }]）。`, `${at}.options`);
+      fail('invalid-options', 'options 必须是数组（[{ value, label }] 或 ["a", "b"]）。', `${at}.options`);
     } else if (field.options.length === 0) {
       fail('empty-options', `「${type}」的 options 不能为空数组 —— 没有选项就没得选。`, `${at}.options`);
     } else {
-      const seen = new Map<string, number>();
-      field.options.forEach((option: any, i: number) => {
-        const optionAt = `${at}.options[${i}]`;
-        if (!isPlainObject(option)) {
-          fail('option-invalid', '选项必须是对象（形如 { value, label }）。', optionAt);
-          return;
-        }
-        if (option.value === undefined || option.value === null || option.value === '') {
-          fail('option-missing-value', '选项缺少 value。', optionAt);
-          return;
-        }
-        if (typeof option.value !== 'string') {
-          fail('option-value-not-string', `选项的 value 必须是字符串（控件取值按字符串比对），当前是 ${typeof option.value}。`, optionAt);
-          return;
-        }
-        if (seen.has(option.value)) {
-          fail('duplicate-option-value', `选项 value「${option.value}」重复了（第 ${seen.get(option.value)} 项已经用过）。`, optionAt);
-        } else {
-          seen.set(option.value, i);
-        }
-      });
+      const treeish = TREE_OPTION_FIELD_TYPES.includes(type as FormDslFieldType);
+      checkOptionList(field.options, `${at}.options`, treeish, new Map(), leafValues, fail, warn);
     }
   } else if (field.options !== undefined && knownType) {
     warn(
@@ -264,40 +372,96 @@ function checkField(
     );
   }
 
+  // ---- 类型专属属性的取值 ----
+  if (knownType) {
+    const t = type as FormDslFieldType;
+    const allowedModes = MODE_VALUES[t];
+    if (field.mode !== undefined) {
+      if (!allowedModes) {
+        warn('unknown-field', `「${t}」不认识 mode 会被忽略。`, `${at}.mode`);
+      } else if (!allowedModes.includes(field.mode)) {
+        fail(
+          'invalid-mode',
+          `「${t}」的 mode 只能是 ${allowedModes.join(' / ')}，当前是「${String(field.mode)}」。`,
+          `${at}.mode`
+        );
+      }
+    }
+    if (field.format !== undefined && t === 'time' && !TIME_FORMATS.includes(field.format)) {
+      fail(
+        'invalid-format',
+        `time 的 format 只能是 ${TIME_FORMATS.join(' / ')}，当前是「${String(field.format)}」。`,
+        `${at}.format`
+      );
+    }
+  }
+
   // ---- default ----
+  //
+  // 形状判据来自 `fieldValueShape()` —— 它是**「类型 + 属性」**的函数，不是类型的函数：
+  // `select` / `tree-select` 的默认值是标量还是数组取决于 `mode`；
+  // `checkbox-group` / `transfer` 是数组；`date-range` 是两头齐全的元组。
+  //
+  // 这里修掉过一个真 bug：原先对选项型字段一律要求 `typeof default === 'string'`，
+  // 于是 `checkbox-group` 给一个**合法的数组默认值**会被拒 —— 而报错文案还写着
+  // "必须是字符串数组"。多选组从来就设不了初值。
   if (field.default !== undefined && knownType) {
     const t = type as FormDslFieldType;
-    if (BOOLEAN_FIELD_TYPES.includes(t) && typeof field.default !== 'boolean') {
+    const shape = fieldValueShape(field);
+    const optionValues = optionValueList(field.options, t);
+    const label = `可用取值：${optionValues.join(' / ')}。`;
+
+    if (shape === 'array') {
+      if (!Array.isArray(field.default)) {
+        fail(
+          'default-type-mismatch',
+          `「${t}」的默认值是**数组**（形如 ["a","b"]）${t === 'select' || t === 'tree-select' ? ` —— 它现在是 mode: "${field.mode ?? 'multiple'}"` : ''}，当前是 ${typeof field.default}。`,
+          `${at}.default`
+        );
+      } else {
+        const bad = field.default.filter((v: any) => typeof v !== 'string');
+        if (bad.length) {
+          fail('default-type-mismatch', `「${t}」默认值的每一项都必须是字符串（选项的 value）。`, `${at}.default`);
+        } else if (optionValues.length) {
+          const missing = field.default.filter((v: string) => !optionValues.includes(v));
+          if (missing.length) {
+            fail('default-not-in-options', `默认值里的 ${missing.map((m: string) => `「${m}」`).join(' / ')} 不在 options 里。${label}`, `${at}.default`);
+          }
+        }
+      }
+      field.default = field.default; // 保持原样（数组），编译期直接交给组件
+    } else if (shape === 'tuple') {
+      // `date-range`：两头齐全才算数。只给一头 = 进行中，不是有效初值。
+      const d = field.default;
+      const okShape = Array.isArray(d) && d.length === 2 && d.every((v: any) => typeof v === 'string' || v === null);
+      if (!okShape) {
+        fail(
+          'default-type-mismatch',
+          `「${t}」的默认值必须是**两头**的数组（形如 ["2026-01-01","2026-01-31"]），当前是 ${JSON.stringify(d)}。` +
+            '只给一头表示"还没选完"，不能作为初始值。',
+          `${at}.default`
+        );
+      } else if (d.some((v: any) => v === null)) {
+        fail(
+          'default-type-mismatch',
+          `「${t}」的默认值两头都要有日期（形如 ["2026-01-01","2026-01-31"]），当前是 ${JSON.stringify(d)}。`,
+          `${at}.default`
+        );
+      }
+    } else if (BOOLEAN_FIELD_TYPES.includes(t) && typeof field.default !== 'boolean') {
       fail('default-type-mismatch', `「${t}」的默认值必须是布尔（true / false），当前是 ${typeof field.default}。`, `${at}.default`);
     } else if (NUMERIC_FIELD_TYPES.includes(t) && !isFiniteNumber(field.default)) {
       fail('default-type-mismatch', `「${t}」的默认值必须是数字，当前是 ${typeof field.default}。`, `${at}.default`);
     } else if (TEXT_FIELD_TYPES.includes(t) && typeof field.default !== 'string') {
       fail('default-type-mismatch', `「${t}」的默认值必须是字符串，当前是 ${typeof field.default}。`, `${at}.default`);
     } else if (OPTION_FIELD_TYPES.includes(t) && typeof field.default !== 'string') {
-      fail(
-        'default-type-mismatch',
-        t === 'checkbox-group'
-          ? `「${t}」的默认值必须是字符串数组（形如 ["a","b"]）。`
-          : `「${t}」的默认值必须是某个选项的 value（字符串）。`,
-        `${at}.default`
-      );
-    }
-    // 默认值必须落在 options 里
-    if (
-      knownType &&
+      fail('default-type-mismatch', `「${t}」的默认值必须是某个选项的 value（字符串）。`, `${at}.default`);
+    } else if (
       typeof field.default === 'string' &&
-      Array.isArray(field.options) &&
-      field.options.length > 0 &&
-      t !== 'date'
+      optionValues.length &&
+      !optionValues.includes(field.default)
     ) {
-      const values = field.options.filter(isPlainObject).map((o: any) => o.value);
-      if (values.length && !values.includes(field.default)) {
-        fail(
-          'default-not-in-options',
-          `默认值「${field.default}」不在 options 里。可用取值：${values.join(' / ')}。`,
-          `${at}.default`
-        );
-      }
+      fail('default-not-in-options', `默认值「${field.default}」不在 options 里。${label}`, `${at}.default`);
     }
   }
 

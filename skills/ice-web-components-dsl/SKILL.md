@@ -85,8 +85,17 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 | `switch` | 开关 | boolean | — |
 | `radio-group` | 单选组 | string | `options` `direction` |
 | `checkbox-group` | 多选组 | string[] | `options` `direction` `maxChecked` |
-| `select` | 下拉选择 | string（`mode: "multiple"` 时是 string[]） | `options` `mode` `showSearch` |
-| `date` | 日期选择 | string | `placement` |
+| `select` | 下拉选择 | string（`mode: "multiple"` 时 string[]） | `options` `mode` `showSearch` |
+| `date` | 日期选择 | string（`YYYY-MM-DD`） | `placement` |
+| `color` | 颜色选择 | string（hex） | `options`（色板，也可写裸字符串） |
+| `rate` | 评分 | number | —（`max` = 满分几颗星） |
+| `time` | 时间选择 | string（`HH:mm:ss`） | `format`（`HH:mm:ss` / `HH:mm`） |
+| `segmented` | 分段控制器 | string | `options` `block` |
+| `autocomplete` | 自动完成 | string | `options`（候选，可写裸字符串） |
+| `cascader` | 级联选择 | string（最深一层的叶子） | `options`（带 `children`）`separator` |
+| `tree-select` | 树选择 | string（`mode: "multiple"` 时 string[]） | `options`（带 `children`）`mode` `showSearch` |
+| `transfer` | 穿梭框 | string[] | `options`（候选池） |
+| `date-range` | 区间日期 | `[起, 止]` | —（`required` = 两头都在） |
 
 所有类型都还接受：`name` `type` `label` `placeholder` `default` `required`
 `min` `max` `minLength` `maxLength` `pattern` `message` `rules` `dependencies` `width` `props`。
@@ -94,9 +103,13 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 > 白名单之外的键会被**忽略并给出警告**，警告里会列出这个类型接受哪些键。
 > `props` 是逃生舱（内容不校验），优先用具名属性。
 
-> **上面只有 11 个类型，但库里不止这 11 个控件。** 哪些能当字段还没接、哪些根本不是字段、
-> 以及"值形状"（数组 / 随 `mode` 变 / 元组）与 `required`、`minLength` 的关系，
-> 见 **§7** —— 那一节由清单自动生成，不用记，用到再翻。
+> **`options` 两种写法都行**：`[{ "value": "a", "label": "甲" }]` 或直接 `["a", "b"]`。
+> 库里不同控件要的形状不一样（`string[]` / `{value,label}[]` / `colors` / `nodes` / `dataSource`）——
+> 那些差别**由渲染器归一化**，你只管写 `options`。
+> `cascader` / `tree-select` 可以在项上写 `children` 往下嵌。
+
+> 上面 20 个类型就是全部。库里**不是**字段的组件（以及为什么）见 **§7** ——
+> 那一节由清单自动生成，不用记，用到再翻。
 
 `options` 的形状（`select` / `radio-group` / `checkbox-group` 必需）：
 
@@ -250,41 +263,34 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 
 | `type` | 组件 |
 |---|---|
+| `autocomplete` | `ICEAutoComplete` |
+| `cascader` | `ICECascader` |
 | `checkbox` | `ICECheckBox` |
 | `checkbox-group` | `ICECheckboxGroup` |
+| `color` | `ICEColorPicker` |
 | `date` | `ICEDatePicker` |
+| `date-range` | `ICEDateRangePicker` |
 | `number` | `ICEInputNumber` |
 | `password` | `ICEPasswordField` |
 | `radio-group` | `ICERadioGroup` |
+| `rate` | `ICERate` |
+| `segmented` | `ICESegmented` |
 | `select` | `ICESelect` |
 | `slider` | `ICESlider` |
 | `switch` | `ICESwitch` |
 | `text` | `ICETextField` |
 | `textarea` | `ICETextArea` |
-
-### 7.2 能当字段、但 DSL 还没接的
-
-| 组件 | 建议的 `type` | 说明 |
-|---|---|---|
-| `ICEAutoComplete` | `autocomplete` | 值是 string，但 `options` 是 `string[]` 而不是 `{value,label}[]`，与现有选项模型不同形。 |
-| `ICECascader` | `cascader` | 值是**最深一层的 string**，但 `options` 是树；`getPath()` 才能回显上级 —— 往返语义不唯一，要设计。 |
-| `ICEColorPicker` | `color` | 值是 string（hex），形状干净。 |
-| `ICEDateRangePicker` | `date-range` | 值是**元组** `[string|null, string|null]`，且允许"只选了一头"的进行中状态 —— `required` 该表示"两头都在"还是"至少一头"是一个**语义决策**，不是实现问题。 |
-| `ICERadioButton` | `radio-button` | 注意：单个按钮**不管互斥**（互斥由 ICERadioGroup 维护），直接当字段会做出"两个都能选上"的假单选。 |
-| `ICERate` | `rate` | 值是 number。 |
-| `ICESegmented` | `segmented` | 值是 string，需要 `options`。 |
-| `ICETimePicker` | `time` | 值是 string（HH:mm[:ss]）。 |
-| `ICETransfer` | `transfer` | **没有 `value`**，只有 `targetKeys: string[]` —— 要先把"值"定义出来才谈得上校验。 |
-| `ICETreeSelect` | `tree-select` | 值形状同样取决于 `mode`；且 `nodes` 是树而不是 `options`。 |
-| `ICEUpload` | `upload` | **没有 `value`**，是文件选择器 —— 值该是文件列表，`required` 的含义要重新定义。 |
-
-**这些都别写进 DSL** —— 会被 `unsupported-field-type` 拦下。那是设计如此（宁可拦下也不要静默不生效），不是漏了。
+| `time` | `ICETimePicker` |
+| `transfer` | `ICETransfer` |
+| `tree-select` | `ICETreeSelect` |
 
 ### 7.3 不是字段的（别往字段表里塞）
 
 | 分组 | 不是字段的那些 | 为什么 |
 |---|---|---|
 | 基础组件 | `ICEWidget` `ICEContainer` `ICEPanel` `ICESpace` `ICEGrid` `ICEGridCol` `ICEButton` `ICELabel` `ICETypography` `ICEIcon` `ICESvgIcon` `ICEIconTile` `ICESeparator` | 基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是"画出来的东西"，不是"被填的字段"。 |
+| 数据录入 | `ICERadioButton` | `getFormValue()` 返回的是**布尔**（只表示自己勾没勾），而**互斥要调用方维护** —— 当字段用会做出"两个都能选上"的假单选，而 `radio-group` / `checkbox` 已经覆盖这个需求且更好。证据：`tests/field-values.test.ts`。 |
+| 数据录入 | `ICEUpload` | `setFormValue` 是基类默认的**照收不误**（给什么存什么），组件本身不参与取值 —— 说明它没实现这条约定。而且上传的值是**文件列表**，那东西没法经 JSON 往返给 agent，不是一个"字段值"。要做得多先定义"值是什么"。证据：`tests/field-values.test.ts`。 |
 | 数据录入 | `ICEFormItem` | 表单项容器（DSL 的产物），不是字段。 |
 | 数据录入 | `ICEForm` | 表单容器本身（DSL 的产物），不是字段。 |
 | 数据录入 | `ICEFormList` | 重复行组（`initialRows` + `renderRow`）—— 它是"一个字段"的**复数形式**，形状是数组套字段，不是字段表能表达的。要做得新开一个 kind。 |
@@ -299,7 +305,7 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 - **标量**（文本 / 数值 / 布尔）：`required` 判空、`minLength`/`maxLength` 判**长度**、`pattern` 判格式，都按直觉走。
 - **数组**（`checkbox-group`）：`required: true` 表示"至少选一项"，`minLength: 2` 表示"**至少选 2 项**"（判的是数组长度，不是字符串长度）。
 - **值形状随 `mode` 变**（`select` → `ICESelect`，类型是 `string|string[]`）：`mode: "multiple"` 时值是数组，其余是字符串 —— 写 `default` 与 `required` 时先确认 `mode`。
-- **元组**（将来的 `date-range` → `ICEDateRangePicker`，类型是 `[string|null,string|null]`）：值是**元组** `[string|null, string|null]`，且允许"只选了一头"的进行中状态 —— `required` 该表示"两头都在"还是"至少一头"是一个**语义决策**，不是实现问题。
+- **值形状随 `mode` 变**（`tree-select` → `ICETreeSelect`，类型是 `string|string[]`）：`mode: "multiple"` 时值是数组，其余是字符串 —— 写 `default` 与 `required` 时先确认 `mode`。
 
 ### 7.5 这份清单自己缺什么
 

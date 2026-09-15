@@ -10,20 +10,29 @@
  */
 import { ICEBoxLayout, ICEGroup } from 'ice-render';
 import {
+  ICEAutoComplete,
   ICEButton,
+  ICECascader,
   ICECheckBox,
   ICECheckboxGroup,
+  ICEColorPicker,
   ICEDatePicker,
+  ICEDateRangePicker,
   ICEForm,
   ICEFormItem,
   ICEInputNumber,
   ICEPasswordField,
   ICERadioGroup,
+  ICERate,
+  ICESegmented,
   ICESelect,
   ICESlider,
   ICESwitch,
   ICETextArea,
   ICETextField,
+  ICETimePicker,
+  ICETransfer,
+  ICETreeSelect,
   ICETypography,
   type ICEFormModel,
 } from 'ice-web-components';
@@ -69,15 +78,84 @@ export interface CompiledForm {
 }
 
 /**
- * 选项归一化：`ICESelectOption.label` 是**必填**，而 DSL 里允许不给。
- * 用 `value` 兜底 —— 这是"意图级默认"的一个小例子：模型只想给取值时，
- * 显示文案至少有东西可画，而不是报错。
+ * 选项 → **裸取值数组**。
+ *
+ * 有几个控件的选项就是"一串取值"而不是"取值 + 文案"：
+ * `ICEColorPicker` 的 `colors: string[]`（每个元素是要画的颜色）、
+ * `ICEAutoComplete` 的 `options: string[]`（候选就是文本本身）。
+ *
+ * **这两个不能走 `normalizeOptions`** —— 那会把元素变成 `{value,label}` 对象，
+ * 而组件拿到对象时不会报错：色块会画成**空白**、候选会显示成 `[object Object]`。
+ * 这个 bug 是靠**真去浏览器里看**才发现的（README 里"文档即契约"那套测试抓不到 ——
+ * 它们只验 DSL 合法，不验画出来是什么）。
+ *
+ * DSL 侧两种写法都收（`["#fff"]` 或 `[{value:"#fff",label:"白"}]`），
+ * 对象写法取 `value`，这样模型不必为这个差别换写法。
+ */
+function toValueList(field: FormDslField): string[] | undefined {
+  if (!Array.isArray(field.options)) return undefined;
+  return field.options
+    .map((option) => (typeof option === 'string' ? option : (option as any)?.value))
+    .filter((v): v is string => typeof v === 'string');
+}
+
+/**
+ * 选项归一化。三件事，都是"agent 不该知道"的差别：
+ *
+ * 1. **裸字符串 → `{value, label}`**。库里不同控件要的形状不一样：
+ *    `ICESelect` 要 `{value,label}[]`、`ICESegmented` 要 `{value,label}[]`、
+ *    `ICETreeSelect` 要 `{key,label}[]`。要让模型记住哪个是哪个，就是在收"它记不住"的税。
+ * 2. **`label` 兜底成 `value`**：`ICESelectOption.label` 是必填，DSL 里可省。
+ * 3. **递归 `children`**：级联 / 树的选项是嵌套的，每层都要归一化。
+ *
+ * 注意**"一串取值"型的不走这里**（`ICEColorPicker.colors` / `ICEAutoComplete.options`）——
+ * 见 `toValueList()`。
  */
 function normalizeOptions(field: FormDslField): any[] | undefined {
   if (!Array.isArray(field.options)) return undefined;
-  return field.options.map((option) => ({
-    ...option,
-    label: option.label ?? option.value,
+  return field.options.map((option) => {
+    // 裸字符串写法：`"options": ["#61D9FB", "#fff"]`
+    if (typeof option === 'string') return { value: option, label: option };
+    const { children, ...rest } = option as any;
+    return {
+      ...rest,
+      label: rest.label ?? rest.value,
+      ...(Array.isArray(children) ? { children: normalizeOptions({ options: children } as any) } : {}),
+    };
+  });
+}
+
+/**
+ * 选项树 → `ICETreeNode[]`（`ICETreeSelect` 用）。
+ *
+ * 键名差别：`value` → **`key`**，`label` 保持 `label`。
+ * 这层映射就是"让 DSL 只有一种选项形状"的代价 —— 值得，
+ * 因为它换来的是模型不必知道"这个控件管取值叫 value、那个叫 key"。
+ */
+function toTreeNodes(options: any[] | undefined): any[] | undefined {
+  if (!options) return undefined;
+  return options.map((o) => ({
+    key: o.value,
+    label: o.label ?? o.value,
+    ...(o.disabled !== undefined ? { disabled: o.disabled } : {}),
+    ...(Array.isArray(o.children) ? { children: toTreeNodes(o.children) } : {}),
+  }));
+}
+
+/**
+ * 选项 → `ICETransferItem[]`（`ICETransfer` 用）。
+ *
+ * 这个的键名**又不一样**：`value` → `key`，而 `label` → **`title`**
+ * （条目还有 `description`）。第一版我用 `toTreeNodes` 代它，结果穿梭框里
+ * **只有复选框、没有文字** —— 不报错，因为 `title: undefined` 是合法的。
+ * 这种"键名对不上但类型不报错"的错，只有真去看画出来什么才会发现。
+ */
+function toTransferItems(options: any[] | undefined): any[] | undefined {
+  if (!options) return undefined;
+  return options.map((o) => ({
+    key: o.value,
+    title: o.label ?? o.value,
+    ...(o.disabled !== undefined ? { disabled: o.disabled } : {}),
   }));
 }
 
@@ -115,25 +193,39 @@ function toNativeRules(field: FormDslField): any[] {
 }
 
 /**
- * 哪些字段类型**不**跟着表单宽度拉伸，以及它们该多宽。
+ * 哪些字段类型**不**跟着表单宽度拉伸。两种情形，含义不同：
  *
- * **只有数值这一类**，理由是 `ICEInputNumber` 自己的内部布局：减号贴最左端、数值居中，
- * 宽度一拉大这两样就天各一方（实测 890px 时看着像坏了）—— 数值输入该是它自己那个尺寸。
+ * - **给一个数字**：控件有宽度、但拉伸它就难看了。`ICEInputNumber` 把减号摆最左、
+ *   数值居中，宽度一拉大这两样就天各一方（实测 890px 时看着像坏了）。固定 200。
+ * - **`null`**：控件**根本没有宽度这个概念**。`ICERate` 是一排固定大小的星星
+ *   （它只有 `count` / `size`，没有 `width`）—— 传宽度不是"拉伸它"，是传一个它不认识的键。
  *
- * 反过来，其余类型都必须拉伸，因为它们的出厂默认是**退化的**：
+ * 其余类型都必须拉伸，因为它们的出厂默认是**退化的**：
  * `slider` 默认 10px、`checkbox` 默认 0px、`radio-group` 默认 35px ——
- * 不给宽度就会画出一个看不见的控件（实测：不拉伸时滑块只有 10px）。
- * 而文本类的输入框太窄本身就是问题：它装的是句子。
- *
- * 这就是"意图级默认"要编码的东西 —— 模型不该为这种事写宽度。
+ * 不给宽度就会画出一个看不见的控件（实测：不拉伸时滑块只有 10px 宽）。
  */
-const FIXED_WIDTH_TYPES: Partial<Record<FormDslFieldType, number>> = { number: 200 };
+const FIXED_WIDTH_TYPES: Partial<Record<FormDslFieldType, number | null>> = {
+  number: 200,
+  rate: null,
+};
 
 /**
  * 一个字段 → 一个控件实例。
  *
+ * **所有分支的第一件事都是展开 `...base`。** 这曾经是个真事故：`base` 装的是
+ * 通用键（`placeholder` / 初值 / `width` / `props` 透传），而有 6 个老分支
+ * （`checkbox` / `switch` / `radio-group` / `checkbox-group` / `select` / `date`）
+ * 写的是 `...passthrough, width, …` —— 于是 **`placeholder` 从来没传给过它们**，
+ * 而且 TypeScript 抓不到（`placeholder` 在这些 Options 接口里都是可选的）。
+ * 症状是"下拉框、日期框的占位文案不显示"，直到 2026-09-15 在浏览器里看原型才发现。
+ * `tests/control-options.test.ts` 现在对**每一个**类型守这条不变量。
+ *
+ * 少数派键名（`checkbox`/`switch` 的 `selected`、`transfer` 的 `targetKeys`）
+ * 需要把 `base` 里的 `value` 摘掉再补自己的键。
+ *
  * 这里就是"一处声明、两处生效"落地的地方：
- * - `number` / `slider` 的 `min` / `max` 既进控件（步进夹取），也进规则（校验）；
+ * - `number` / `slider` / `rate` 的 `min` / `max` 既进控件（步进夹取 / 满分星数），
+ *   也进规则（校验）；
  * - 文本类的 `maxLength` 既限制输入长度，也进规则。
  * 原生路径这两件事互不相干，模型只会写其中一个。
  *
@@ -145,8 +237,10 @@ const FIXED_WIDTH_TYPES: Partial<Record<FormDslFieldType, number>> = { number: 2
 function createControl(field: FormDslField, stretchWidth: number): any {
   const fixed = FIXED_WIDTH_TYPES[field.type];
   const width = field.width ?? (fixed === undefined ? stretchWidth : fixed);
+  /** 控件不认宽度（`rate`）时不传这个键 —— 传了不是拉伸，是塞一个它没有的属性。 */
+  const widthProp = width === null ? {} : { width };
   const passthrough = field.props || {};
-  const base: Record<string, any> = { value: undefined, width, ...passthrough };
+  const base: Record<string, any> = { value: undefined, ...widthProp, ...passthrough };
   if (field.placeholder !== undefined) base.placeholder = field.placeholder;
   if (field.default !== undefined) base.value = field.default;
 
@@ -187,45 +281,137 @@ function createControl(field: FormDslField, stretchWidth: number): any {
         ...(field.range !== undefined ? { range: field.range } : {}),
       });
     case 'checkbox':
-      return new ICECheckBox({ ...passthrough, width, ...(field.default !== undefined ? { selected: field.default } : {}) });
-    case 'switch':
-      return new ICESwitch({ ...passthrough, width, ...(field.default !== undefined ? { selected: field.default } : {}) });
+    case 'switch': {
+      // 勾选态的初值键名是 **`selected`** 而不是 `value` —— 与 `transfer` 的
+      // `targetKeys` 同类（少数派键名）。所以要摘掉 `base` 里的 `value`。
+      const { value: _dropValue, ...baseNoValue } = base;
+      const Control = type === 'checkbox' ? ICECheckBox : ICESwitch;
+      return new Control({
+        ...baseNoValue,
+        ...(field.default !== undefined ? { selected: field.default } : {}),
+      });
+    }
     case 'radio-group':
       return new ICERadioGroup({
-        ...passthrough,
-        width,
+        ...base,
         options: normalizeOptions(field),
-        ...(field.default !== undefined ? { value: field.default } : {}),
         ...(field.direction !== undefined ? { direction: field.direction } : {}),
       });
     case 'checkbox-group':
       return new ICECheckboxGroup({
-        ...passthrough,
-        width,
+        ...base,
         options: normalizeOptions(field),
-        ...(field.default !== undefined ? { value: field.default } : {}),
         ...(field.direction !== undefined ? { direction: field.direction } : {}),
         ...(field.maxChecked !== undefined ? { max: field.maxChecked } : {}),
       });
     case 'select':
       return new ICESelect({
-        ...passthrough,
-        width,
+        ...base,
         options: normalizeOptions(field),
-        ...(field.default !== undefined ? { value: field.default } : {}),
-        ...(field.mode !== undefined ? { mode: field.mode } : {}),
+        // `mode` 在 DSL 里是 string、由 validate.ts 的 MODE_VALUES 按类型校验
+        // （`select` 有 tags、`tree-select` 没有）。就地把关一次交给严格类型。
+        ...(field.mode !== undefined ? { mode: field.mode as any } : {}),
         ...(field.showSearch !== undefined ? { showSearch: field.showSearch } : {}),
       });
     case 'date':
       return new ICEDatePicker({
-        ...passthrough,
-        width,
-        ...(field.default !== undefined ? { value: field.default } : {}),
+        ...base,
         // `placement` 在 DSL 类型里是 string、由 validate.ts 按白名单校验
         // （对 agent 来说"诊断里列出合法值"比 TS 联合类型有用，也避免与上游漂移）。
         // 这里是唯一一处需要把它交给严格类型的地方，所以就地断言一次。
         ...(field.placement !== undefined ? { placement: field.placement as any } : {}),
       });
+
+    // ---------------------------------------------------------------------
+    // 第二批（0.3.0）。分成三组看：值的形状决定要额外操心什么。
+    // 值形状是「类型 + 属性」的函数，见 types.ts 的 fieldValueShape()。
+    // ---------------------------------------------------------------------
+
+    // ---- 值是标量、选项形状与 `{value,label}` 同形 ----
+    //
+    // **每个分支都必须先展开 `...base`**：它装着 `placeholder` / `value`（初值）/
+    // `width` / `props` 透传。第一版这 9 个分支我写成了 `...passthrough, width, …`，
+    // 结果 `placeholder` **全部被静默丢掉** —— 而 TypeScript 抓不到，
+    // 因为 `placeholder` 在所有这些 Options 接口里都是可选的。
+    // 症状是"级联 / 树选择 / 自动完成的占位文案不显示"，只有真去看画出来什么才会发现。
+    case 'segmented':
+      return new ICESegmented({
+        ...base,
+        options: normalizeOptions(field),
+        ...(field.block !== undefined ? { block: field.block } : {}),
+      });
+    case 'color':
+      // 两处差别：键名叫 `colors`（不是 `options`），而且元素是**裸颜色字符串**
+      // 而不是 `{value,label}` —— 传对象进去色块会画成空白，不报错。
+      return new ICEColorPicker({
+        ...base,
+        ...(field.options !== undefined ? { colors: toValueList(field) ?? [] } : {}),
+      });
+    case 'autocomplete':
+      // 同理：候选就是文本本身（`options: string[]`），不是 `{value,label}`
+      return new ICEAutoComplete({
+        ...base,
+        options: toValueList(field) ?? [],
+      });
+    case 'cascader':
+      // 值是最深一层的 `value`；选项是嵌套的，`children` 已在归一化里递归处理
+      return new ICECascader({
+        ...base,
+        options: normalizeOptions(field),
+        ...(field.separator !== undefined ? { separator: field.separator } : {}),
+      });
+    case 'rate':
+      // `max` 在 DSL 里是"满分几颗星"→ 映射到组件的 `count`；
+      // **同时**它已经进了规则（`shorthandRule` 里的 `max`），所以"给 6 星"会被拦下。
+      // 这正是"一处声明、两处生效"在第二批上的延续。
+      return new ICERate({
+        ...base,
+        ...(field.max !== undefined ? { count: field.max } : {}),
+      });
+    case 'time':
+      return new ICETimePicker({
+        ...base,
+        // `format` 在 `ICETimePicker` 上恰好是**字符串**联合（不是函数），
+        // 所以这个能进 DSL —— 跟 `date` 的 `format` 正好相反（那是函数，进不来）。
+        ...(field.format !== undefined ? { format: field.format } : {}),
+      });
+    case 'tree-select':
+      // `nodes` 的键名是 `key` 而不是 `value`，映射一次（`toTreeNodes`）
+      return new ICETreeSelect({
+        ...base,
+        nodes: toTreeNodes(normalizeOptions(field)),
+        // `mode` 在 DSL 类型里是 string、由 validate.ts 按**类型**白名单校验：
+        // `tree-select` 只认 single/multiple，`select` 还多一个 tags。
+        // 让 TS 联合去管这件事的话，错误会出现在这里（"tags 不能赋给 tree-select"），
+        // 而 agent 需要的是诊断里说清"这个类型可用哪些取值"。
+        ...(field.mode !== undefined ? { mode: field.mode as any } : {}),
+        ...(field.showSearch !== undefined ? { showSearch: field.showSearch } : {}),
+      });
+
+    // ---- 值是数组 ----
+    case 'transfer': {
+      // 候选池是 `dataSource`（`{key,title}`），而**值的键名是 `targetKeys`** ——
+      // 它是唯一一个初值不走 `value` 的类型（清单里的 `initKey` 记着这件事）。
+      // 所以这里要把 `base` 里的 `value` 摘掉，否则会同时塞进一个没人认的 `value`。
+      const { value: _dropValue, ...baseNoValue } = base;
+      return new ICETransfer({
+        ...baseNoValue,
+        dataSource: toTransferItems(normalizeOptions(field)),
+        ...(field.default !== undefined ? { targetKeys: field.default } : {}),
+      });
+    }
+
+    // ---- 值是元组 ----
+    case 'date-range':
+      // 值形状是 `[起, 止]`，且允许一头是 null（"只选了一头"= 进行中）。
+      // `required` 的语义**在这里定案**：两头都在才算填完 —— 校验由
+      // `ICEFormModel` 的 required 判定负责，它判空数组 / 空串 / null；
+      // 而 `setFormValue` 对不完整区间会回落成 `[null, null]`
+      // （见 tests/field-values.test.ts 的运行时证据），所以"只选一头"等价于没填。
+      return new ICEDateRangePicker({
+        ...base,
+      });
+
     default: {
       // 类型已经过校验，走到这里说明 validate 与 compiler 不同步了 —— 响亮失败
       throw new FormDslCompileError(

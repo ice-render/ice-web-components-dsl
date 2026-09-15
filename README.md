@@ -83,6 +83,9 @@ ice.addChild(container);
 
 ## 4. 字段类型与它们接受的属性
 
+共 **20 个类型**（`FORM_DSL_FIELD_TYPES`）。加新类型的**硬条件**是"值能经 JSON 往返" ——
+判据是运行时的，不是从文档看来的（见 §4.1）。
+
 | `type` | 取值类型 | 该类型额外接受 |
 | --- | --- | --- |
 | `text` / `textarea` | string | `allowClear` `showCount` |
@@ -91,14 +94,46 @@ ice.addChild(container);
 | `slider` | number | `step` `range` |
 | `checkbox` / `switch` | boolean | — |
 | `radio-group` / `checkbox-group` | string / string[] | `options` `direction`（多选组还有 `maxChecked`） |
-| `select` | string | `options` `mode`（`single`/`multiple`/`tags`）`showSearch` |
-| `date` | string | `placement` |
+| `select` | string（`mode: multiple` 时 string[]） | `options` `mode`（`single`/`multiple`/`tags`）`showSearch` |
+| `date` | string（`YYYY-MM-DD`） | `placement` |
+| `color` | string（hex） | `options`（色板） |
+| `rate` | number | —（`max` = 满分几颗星） |
+| `time` | string（`HH:mm:ss`） | `format`（`HH:mm:ss` / `HH:mm`） |
+| `segmented` | string | `options` `block` |
+| `autocomplete` | string | `options`（候选） |
+| `cascader` | string（最深一层的叶子） | `options`（带 `children`）`separator` |
+| `tree-select` | string（`mode: multiple` 时 string[]） | `options`（带 `children`）`mode` `showSearch` |
+| `transfer` | string[] | `options`（候选池） |
+| `date-range` | `[起, 止]` | —（`required` = 两头都在） |
 
 所有类型都还接受：`name` `type` `label` `placeholder` `default` `required` `min` `max`
 `minLength` `maxLength` `pattern` `message` `rules` `dependencies` `width` `props`。
 
 **白名单之外的键会被忽略，并给出警告** —— 警告里会列出这个类型接受哪些键。这就是"字段表封闭"的好处：
 模型不会静默地写一个不生效的属性。
+
+**`options` 两种写法都收**：`[{ "value": "a", "label": "甲" }]` 或直接 `["a", "b"]`。
+库里不同控件要的形状不一样（`colors: string[]` / `options: string[]` / `{value,label}[]` /
+`nodes: {key,label}` / `dataSource: {key,title}`），**那些差别由编译期归一化** ——
+否则就是在收"模型记不住哪个是哪个"的税。
+
+### 4.1 判据是运行时的：值能不能经 JSON 往返
+
+`ice-web-components` 有 84 个 UI 组件，但不是每个都能当字段。判据不是"有没有 `value` 构造参数"，
+也不是"有没有 `getFormValue`"（那是 `ICEWidget` **基类**给的，人人都有），而是
+**`setFormValue(v)` 之后 `getFormValue()` 还回不还得出同一个东西**：
+
+| 组件 | 运行时表现 | 结论 |
+| --- | --- | --- |
+| `ICEColorPicker` | `3 → "3"`、`["a","b"] → "a,b"`（强制转字符串） | ✅ 真实现 |
+| `ICEDateRangePicker` | 只认两头齐全的元组，其余回落成 `[null,null]` | ✅ 真实现 |
+| `ICETransfer` | 只认 `string[]`，其余回落成 `[]`（按数据源过滤） | ✅ 真实现 |
+| `ICERadioButton` | `getFormValue()` 返回**布尔**（只表示自己勾没勾，互斥要调用方维护） | ❌ 假单选 |
+| `ICEUpload` | `setFormValue` **照收不误**（基类默认），组件本身不参与取值 | ❌ 没实现 |
+
+证据在 `tests/field-values.test.ts`（构造出来真调一遍），`tools/probe-field-values.mjs`
+是同一件事的交互版。`ICERadioButton` / `ICEUpload` 因此**不在**类型表里 ——
+不是漏了，是判过不能用。
 
 ## 5. 一处声明、两处生效
 
@@ -328,7 +363,7 @@ npm run verify        # types:check + build + jest
 npm run verify:full   # 上面 + playwright（示例页真机冒烟）
 ```
 
-当前规模：**98 单测 / 4 套件**，**10 e2e / 1 spec**，清单覆盖 **84 个 UI 组件**（9 组 / 185 个条目）。
+当前规模：**128 单测 / 6 套件**，**10 e2e / 1 spec**，**20 个字段类型**，清单覆盖 **84 个 UI 组件**（9 组 / 185 个条目）。
 
 示例页 e2e 的判据不是"按钮存在"，而是：画布上真的有墨、
 **真实点中画布上的提交按钮**能走完校验 → 提交这条链、诊断里带可操作的替代信息。

@@ -10,8 +10,8 @@
     "groups": 9,
     "components": 185,
     "classes": 113,
-    "fieldCapable": 11,
-    "planned": 11
+    "fieldCapable": 20,
+    "planned": 0
   },
   "gaps": {
     "propsMissing": [
@@ -356,32 +356,32 @@
       "summary": "所有 UI 组件的基类（继承引擎 ICEGroup）。 在引擎的绘制能力之上只加四件事：交互态（enabled / hovered / focused）、键盘焦点 （focusable / activate()）、表单校验态（validateStatus）、表单取值约定 （getFormValue / setFormValue）。",
       "props": [],
       "methods": [
-        "t(key: string, vars?: Record<string, string | number>)",
-        "setLocale(locale?: string)",
-        "getFocusRingMode()",
-        "setFocusRingMode(mode: 'keyboard' | 'always' | 'never')",
-        "shouldShowFocusRing(origin: 'mouse' | 'keyboard' | 'api')",
-        "setEnabled(enabled: boolean)",
-        "setAriaLabel(label: string)",
-        "getAriaLabel()",
-        "isEnabled()",
-        "isHovered()",
-        "isFocusable()",
-        "setFocusable(focusable: boolean)",
-        "isFocused()",
-        "setFocused(focused: boolean)",
-        "activate()",
-        "getValidateStatus()",
-        "setValidateStatus(status: 'default' | 'error' | 'warning' | 'success')",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "setHovered(hovered: boolean)",
-        "getPreferredSize()",
-        "setPainter(painter: ICEPainter | null)",
-        "getPainter()",
-        "paintDecoration()",
-        "addChild(child: any, markDirty: boolean)",
-        "theme()"
+        "t",
+        "setLocale",
+        "getFocusRingMode",
+        "setFocusRingMode",
+        "shouldShowFocusRing",
+        "setEnabled",
+        "setAriaLabel",
+        "getAriaLabel",
+        "isEnabled",
+        "isHovered",
+        "isFocusable",
+        "setFocusable",
+        "isFocused",
+        "setFocused",
+        "activate",
+        "getValidateStatus",
+        "setValidateStatus",
+        "getFormValue",
+        "setFormValue",
+        "setHovered",
+        "getPreferredSize",
+        "setPainter",
+        "getPainter",
+        "paintDecoration",
+        "addChild",
+        "theme"
       ],
       "value": {
         "kind": "unknown",
@@ -390,7 +390,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEContainer": {
       "name": "ICEContainer",
@@ -400,7 +401,7 @@
       "summary": "容器基类：在此挂布局策略（setLayout，链式返回自身）。",
       "props": [],
       "methods": [
-        "setLayout(layout: ICELayoutManager)"
+        "setLayout"
       ],
       "value": {
         "kind": "unknown",
@@ -409,7 +410,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEPanel": {
       "name": "ICEPanel",
@@ -426,7 +428,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESpace": {
       "name": "ICESpace",
@@ -491,14 +494,14 @@
         }
       ],
       "methods": [
-        "getItems()",
-        "setSize(size: number)",
-        "getSize()",
-        "setAlign(align: 'start' | 'center' | 'end')",
-        "addItem(child: any)",
-        "addChild(child: any, markDirty: boolean)",
-        "removeItem(child: any)",
-        "doLayout()"
+        "getItems",
+        "setSize",
+        "getSize",
+        "setAlign",
+        "addItem",
+        "addChild",
+        "removeItem",
+        "doLayout"
       ],
       "value": {
         "kind": "none",
@@ -507,7 +510,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEGrid": {
       "name": "ICEGrid",
@@ -560,12 +564,12 @@
         }
       ],
       "methods": [
-        "getCols()",
-        "addCol(col: ICEGridCol)",
-        "setGutter(gutter: number, gutterY?: number)",
-        "getGutter()",
-        "getGutterY()",
-        "doLayout()"
+        "getCols",
+        "addCol",
+        "setGutter",
+        "getGutter",
+        "getGutterY",
+        "doLayout"
       ],
       "value": {
         "kind": "none",
@@ -574,7 +578,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEGridCol": {
       "name": "ICEGridCol",
@@ -615,8 +620,8 @@
         }
       ],
       "methods": [
-        "getContent()",
-        "applyLayout(left: number, top: number, width: number)"
+        "getContent",
+        "applyLayout"
       ],
       "value": {
         "kind": "none",
@@ -625,7 +630,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEButton": {
       "name": "ICEButton",
@@ -635,16 +641,16 @@
       "summary": "按钮：primary / default / text / link 变体，danger 与三种尺寸， 自带 hover / 焦点 / 禁用态，点击时触发 click。",
       "props": [],
       "methods": [
-        "setAriaLabel(label: string)",
-        "setText(text: string)",
-        "getText()",
-        "setIcon(icon: string)",
-        "getIcon()",
-        "isLoading()",
-        "setLoading(loading: boolean)",
-        "activate()",
-        "initEvents()",
-        "setEnabled(enabled: boolean)"
+        "setAriaLabel",
+        "setText",
+        "getText",
+        "setIcon",
+        "getIcon",
+        "isLoading",
+        "setLoading",
+        "activate",
+        "initEvents",
+        "setEnabled"
       ],
       "value": {
         "kind": "unknown",
@@ -653,7 +659,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICELabel": {
       "name": "ICELabel",
@@ -663,10 +670,10 @@
       "summary": "文本标签：包装引擎 ICEText，支持水平（align）与垂直（verticalAlign）对齐； 未显式给尺寸时采用文字的实测尺寸，便于参与流式/盒式布局。",
       "props": [],
       "methods": [
-        "setText(text: string)",
-        "getText()",
-        "setTextColor(color: string)",
-        "getPreferredSize()"
+        "setText",
+        "getText",
+        "setTextColor",
+        "getPreferredSize"
       ],
       "value": {
         "kind": "unknown",
@@ -675,7 +682,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETypography": {
       "name": "ICETypography",
@@ -770,13 +778,13 @@
         }
       ],
       "methods": [
-        "getText()",
-        "getLines()",
-        "getFontSize()",
-        "getTextColor()",
-        "getLabelNodes()",
-        "setText(text: string)",
-        "setType(type: ICETypographyType)"
+        "getText",
+        "getLines",
+        "getFontSize",
+        "getTextColor",
+        "getLabelNodes",
+        "setText",
+        "setType"
       ],
       "value": {
         "kind": "none",
@@ -785,7 +793,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEIcon": {
       "name": "ICEIcon",
@@ -795,7 +804,7 @@
       "summary": "图标：一个居中的字形（★ ✓ ℹ …），字号与颜色可配。",
       "props": [],
       "methods": [
-        "setIcon(icon: string)"
+        "setIcon"
       ],
       "value": {
         "kind": "unknown",
@@ -804,7 +813,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESvgIcon": {
       "name": "ICESvgIcon",
@@ -814,11 +824,11 @@
       "summary": "SVG 路径图标：给一段 d 路径数据，按 viewBox 缩放到目标尺寸并描边。",
       "props": [],
       "methods": [
-        "setColor(color: string)",
-        "setStrokeWidth(width: number)",
-        "setPath(d: string)",
-        "getPath()",
-        "getPathNode()"
+        "setColor",
+        "setStrokeWidth",
+        "setPath",
+        "getPath",
+        "getPathNode"
       ],
       "value": {
         "kind": "unknown",
@@ -827,7 +837,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEIconTile": {
       "name": "ICEIconTile",
@@ -916,14 +927,14 @@
         }
       ],
       "methods": [
-        "getLabel()",
-        "isSelected()",
-        "setSelected(selected: boolean)",
-        "toggle()",
-        "open()",
-        "activate()",
-        "getLabelColor()",
-        "getLabelBackground()"
+        "getLabel",
+        "isSelected",
+        "setSelected",
+        "toggle",
+        "open",
+        "activate",
+        "getLabelColor",
+        "getLabelBackground"
       ],
       "value": {
         "kind": "none",
@@ -932,7 +943,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESeparator": {
       "name": "ICESeparator",
@@ -949,7 +961,8 @@
       "role": {
         "kind": "not-field",
         "reason": "基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是\"画出来的东西\"，不是\"被填的字段\"。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETextField": {
       "name": "ICETextField",
@@ -959,22 +972,22 @@
       "summary": "单行文本输入：聚焦边框、错误态、表单取值约定与键盘输入； 子类通过覆盖 __allowNewline() 等钩子扩展（见 ICETextArea）。",
       "props": [],
       "methods": [
-        "getValue()",
-        "getTextNodes()",
-        "getCountText()",
-        "isClearVisible()",
-        "clear()",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "setValue(value: string)",
-        "getPlaceholder()",
-        "setPlaceholder(placeholder: string)",
-        "focus()",
-        "blur()",
-        "activate()",
-        "getFieldText()",
-        "refresh()",
-        "formatDisplayValue(value: string)"
+        "getValue",
+        "getTextNodes",
+        "getCountText",
+        "isClearVisible",
+        "clear",
+        "getFormValue",
+        "setFormValue",
+        "setValue",
+        "getPlaceholder",
+        "setPlaceholder",
+        "focus",
+        "blur",
+        "activate",
+        "getFieldText",
+        "refresh",
+        "formatDisplayValue"
       ],
       "value": {
         "kind": "unknown",
@@ -983,7 +996,8 @@
       "role": {
         "kind": "field",
         "fieldType": "text"
-      }
+      },
+      "initKey": "value"
     },
     "ICETextArea": {
       "name": "ICETextArea",
@@ -1000,7 +1014,8 @@
       "role": {
         "kind": "field",
         "fieldType": "textarea"
-      }
+      },
+      "initKey": "value"
     },
     "ICEPasswordField": {
       "name": "ICEPasswordField",
@@ -1010,10 +1025,10 @@
       "summary": "密码框：显示掩码（• 数量 = 真实长度），getValue() / 表单取值仍是明文。 showToggle: true 时右侧出现眼睛按钮，可在明文/掩码之间切换（便于用户核对输入）。",
       "props": [],
       "methods": [
-        "isVisible()",
-        "setVisible(visible: boolean)",
-        "getToggleButton()",
-        "formatDisplayValue(value: string)"
+        "isVisible",
+        "setVisible",
+        "getToggleButton",
+        "formatDisplayValue"
       ],
       "value": {
         "kind": "unknown",
@@ -1022,7 +1037,8 @@
       "role": {
         "kind": "field",
         "fieldType": "password"
-      }
+      },
+      "initKey": "value"
     },
     "ICEInputNumber": {
       "name": "ICEInputNumber",
@@ -1105,14 +1121,14 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: number)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getText()",
-        "getIncreaseButton()",
-        "getDecreaseButton()",
-        "setEnabled(enabled: boolean)"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getText",
+        "getIncreaseButton",
+        "getDecreaseButton",
+        "setEnabled"
       ],
       "value": {
         "kind": "scalar",
@@ -1121,7 +1137,8 @@
       "role": {
         "kind": "field",
         "fieldType": "number"
-      }
+      },
+      "initKey": "value"
     },
     "ICECheckBox": {
       "name": "ICECheckBox",
@@ -1131,12 +1148,12 @@
       "summary": "复选框：点击或 Enter/Space 切换勾选，触发 change，可直接进表单。",
       "props": [],
       "methods": [
-        "isSelected()",
-        "setSelected(selected: boolean)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "activate()",
-        "initEvents()"
+        "isSelected",
+        "setSelected",
+        "getFormValue",
+        "setFormValue",
+        "activate",
+        "initEvents"
       ],
       "value": {
         "kind": "unknown",
@@ -1145,7 +1162,8 @@
       "role": {
         "kind": "field",
         "fieldType": "checkbox"
-      }
+      },
+      "initKey": "value"
     },
     "ICERadioButton": {
       "name": "ICERadioButton",
@@ -1155,22 +1173,22 @@
       "summary": "单选框：点击或 Enter/Space 选中；同组互斥由调用方（表单/业务）维护。",
       "props": [],
       "methods": [
-        "isSelected()",
-        "setSelected(selected: boolean)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "activate()",
-        "initEvents()"
+        "isSelected",
+        "setSelected",
+        "getFormValue",
+        "setFormValue",
+        "activate",
+        "initEvents"
       ],
       "value": {
         "kind": "unknown",
         "type": null
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "radio-button"
+        "kind": "not-field",
+        "reason": "`getFormValue()` 返回的是**布尔**（只表示自己勾没勾），而**互斥要调用方维护** —— 当字段用会做出\"两个都能选上\"的假单选，而 `radio-group` / `checkbox` 已经覆盖这个需求且更好。证据：`tests/field-values.test.ts`。"
       },
-      "note": "注意：单个按钮**不管互斥**（互斥由 ICERadioGroup 维护），直接当字段会做出\"两个都能选上\"的假单选。"
+      "initKey": "value"
     },
     "ICERadioGroup": {
       "name": "ICERadioGroup",
@@ -1247,16 +1265,16 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: string)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getOptionNodes()",
-        "getItemNode(value: string)",
-        "getRadioNode(value: string)",
-        "getLabelTexts()",
-        "getActiveIndex()",
-        "setOptions(options: ICERadioGroupOption[])"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getOptionNodes",
+        "getItemNode",
+        "getRadioNode",
+        "getLabelTexts",
+        "getActiveIndex",
+        "setOptions"
       ],
       "value": {
         "kind": "scalar",
@@ -1265,7 +1283,8 @@
       "role": {
         "kind": "field",
         "fieldType": "radio-group"
-      }
+      },
+      "initKey": "value"
     },
     "ICECheckboxGroup": {
       "name": "ICECheckboxGroup",
@@ -1348,20 +1367,20 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "getCheckedCount()",
-        "isChecked(value: string)",
-        "setValue(value: string[])",
-        "checkAll()",
-        "clear()",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getOptionNodes()",
-        "getItemNode(value: string)",
-        "getCheckboxNode(value: string)",
-        "getLabelTexts()",
-        "getActiveIndex()",
-        "setOptions(options: ICECheckboxGroupOption[])"
+        "getValue",
+        "getCheckedCount",
+        "isChecked",
+        "setValue",
+        "checkAll",
+        "clear",
+        "getFormValue",
+        "setFormValue",
+        "getOptionNodes",
+        "getItemNode",
+        "getCheckboxNode",
+        "getLabelTexts",
+        "getActiveIndex",
+        "setOptions"
       ],
       "value": {
         "kind": "array",
@@ -1370,7 +1389,8 @@
       "role": {
         "kind": "field",
         "fieldType": "checkbox-group"
-      }
+      },
+      "initKey": "value"
     },
     "ICESwitch": {
       "name": "ICESwitch",
@@ -1380,12 +1400,12 @@
       "summary": "开关：点击或 Enter/Space 切换，滑块带过渡动画，触发 change。",
       "props": [],
       "methods": [
-        "isSelected()",
-        "setSelected(selected: boolean)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "activate()",
-        "initEvents()"
+        "isSelected",
+        "setSelected",
+        "getFormValue",
+        "setFormValue",
+        "activate",
+        "initEvents"
       ],
       "value": {
         "kind": "unknown",
@@ -1394,7 +1414,8 @@
       "role": {
         "kind": "field",
         "fieldType": "switch"
-      }
+      },
+      "initKey": "value"
     },
     "ICESlider": {
       "name": "ICESlider",
@@ -1404,17 +1425,17 @@
       "summary": "滑块：单值 / 区间双滑块，支持 step 量化与方向键微调。",
       "props": [],
       "methods": [
-        "isRange()",
-        "setValue(value: number)",
-        "getValue()",
-        "getRangeValue()",
-        "setRangeValue(value: [number, number] | number[])",
-        "getThumbs()",
-        "getActiveThumb()",
-        "setActiveThumb(thumb: 'lower' | 'upper')",
-        "setValueFromRatio(ratio: number, thumb?: 'lower' | 'upper')",
-        "getFormValue()",
-        "setFormValue(value: any)"
+        "isRange",
+        "setValue",
+        "getValue",
+        "getRangeValue",
+        "setRangeValue",
+        "getThumbs",
+        "getActiveThumb",
+        "setActiveThumb",
+        "setValueFromRatio",
+        "getFormValue",
+        "setFormValue"
       ],
       "value": {
         "kind": "unknown",
@@ -1423,7 +1444,8 @@
       "role": {
         "kind": "field",
         "fieldType": "slider"
-      }
+      },
+      "initKey": "value"
     },
     "ICESegmented": {
       "name": "ICESegmented",
@@ -1488,21 +1510,22 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: string)",
-        "getSegmentNode(value: string)",
-        "isBlock()",
-        "getSegmentBoxes()"
+        "getValue",
+        "setValue",
+        "getSegmentNode",
+        "isBlock",
+        "getSegmentBoxes"
       ],
       "value": {
         "kind": "scalar",
         "type": "string"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "segmented"
+        "kind": "field",
+        "fieldType": "segmented"
       },
-      "note": "值是 string，需要 `options`。"
+      "initKey": "value",
+      "note": "值是 string，`options` 与现有形状同形。"
     },
     "ICERate": {
       "name": "ICERate",
@@ -1567,21 +1590,22 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: number)",
-        "getPreviewValue()",
-        "getStarNodes()",
-        "setDisabled(disabled: boolean)"
+        "getValue",
+        "setValue",
+        "getPreviewValue",
+        "getStarNodes",
+        "setDisabled"
       ],
       "value": {
         "kind": "scalar",
         "type": "number"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "rate"
+        "kind": "field",
+        "fieldType": "rate"
       },
-      "note": "值是 number。"
+      "initKey": "value",
+      "note": "值是 number，且**没有 `width`**（一排固定大小的星星）—— 唯一一个不能传宽度的类型。`max` 在 DSL 里是\"满分几颗星\"，映射到组件的 `count` 并同时进规则。"
     },
     "ICEUpload": {
       "name": "ICEUpload",
@@ -1718,45 +1742,45 @@
         }
       ],
       "methods": [
-        "getFileList()",
-        "isDisabled()",
-        "getLastRejectReason()",
-        "getDropZoneNode()",
-        "getHintText()",
-        "getFileNode(uid: string)",
-        "addFile(file: Partial<ICEUploadFile>)",
-        "getQueuedCount()",
-        "getConcurrency()",
-        "setUploadConcurrency(concurrency: number)",
-        "isUploadsPaused()",
-        "pauseUploads()",
-        "resumeUploads()",
-        "getFileStatus(uid: string)",
-        "isDragOver()",
-        "isRowDragging()",
-        "retryFile(uid: string)",
-        "removeFile(uid: string)",
-        "getFileRows()",
-        "getFileRowText(uid: string)",
-        "getFileRemoveButton(uid: string)",
-        "getFileProgressNode(uid: string)",
-        "getFileProgress(uid: string)",
-        "setFileProgress(uid: string, progress: number)",
-        "formatFileSize(bytes: number)",
-        "clear()",
-        "setDisabled(disabled: boolean)",
-        "openPicker()",
-        "activate()"
+        "getFileList",
+        "isDisabled",
+        "getLastRejectReason",
+        "getDropZoneNode",
+        "getHintText",
+        "getFileNode",
+        "addFile",
+        "getQueuedCount",
+        "getConcurrency",
+        "setUploadConcurrency",
+        "isUploadsPaused",
+        "pauseUploads",
+        "resumeUploads",
+        "getFileStatus",
+        "isDragOver",
+        "isRowDragging",
+        "retryFile",
+        "removeFile",
+        "getFileRows",
+        "getFileRowText",
+        "getFileRemoveButton",
+        "getFileProgressNode",
+        "getFileProgress",
+        "setFileProgress",
+        "formatFileSize",
+        "clear",
+        "setDisabled",
+        "openPicker",
+        "activate"
       ],
       "value": {
         "kind": "none",
         "type": null
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "upload"
+        "kind": "not-field",
+        "reason": "`setFormValue` 是基类默认的**照收不误**（给什么存什么），组件本身不参与取值 —— 说明它没实现这条约定。而且上传的值是**文件列表**，那东西没法经 JSON 往返给 agent，不是一个\"字段值\"。要做得多先定义\"值是什么\"。证据：`tests/field-values.test.ts`。"
       },
-      "note": "**没有 `value`**，是文件选择器 —— 值该是文件列表，`required` 的含义要重新定义。"
+      "initKey": "value"
     },
     "ICEFormItem": {
       "name": "ICEFormItem",
@@ -1839,17 +1863,17 @@
         }
       ],
       "methods": [
-        "getName()",
-        "getLabel()",
-        "getRules()",
-        "getDependencies()",
-        "getControl()",
-        "getLabelNode()",
-        "getErrorNode()",
-        "getErrorText()",
-        "isValidating()",
-        "setValidating(pending: boolean)",
-        "setError(message: string | null)"
+        "getName",
+        "getLabel",
+        "getRules",
+        "getDependencies",
+        "getControl",
+        "getLabelNode",
+        "getErrorNode",
+        "getErrorText",
+        "isValidating",
+        "setValidating",
+        "setError"
       ],
       "value": {
         "kind": "none",
@@ -1858,7 +1882,8 @@
       "role": {
         "kind": "not-field",
         "reason": "表单项容器（DSL 的产物），不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEForm": {
       "name": "ICEForm",
@@ -1917,20 +1942,20 @@
         }
       ],
       "methods": [
-        "getModel()",
-        "flushValidateDebounce()",
-        "getItems()",
-        "addItems(items: ICEFormItem[])",
-        "addItem(item: ICEFormItem)",
-        "getValues()",
-        "setValues(values: Record<string, any>)",
-        "reset()",
-        "validate()",
-        "validateAsync()",
-        "onSubmit(handler: ICEFormSubmitHandler)",
-        "submit()",
-        "submitAsync()",
-        "doLayout()"
+        "getModel",
+        "flushValidateDebounce",
+        "getItems",
+        "addItems",
+        "addItem",
+        "getValues",
+        "setValues",
+        "reset",
+        "validate",
+        "validateAsync",
+        "onSubmit",
+        "submit",
+        "submitAsync",
+        "doLayout"
       ],
       "value": {
         "kind": "none",
@@ -1939,7 +1964,8 @@
       "role": {
         "kind": "not-field",
         "reason": "表单容器本身（DSL 的产物），不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEFormList": {
       "name": "ICEFormList",
@@ -2040,19 +2066,19 @@
         }
       ],
       "methods": [
-        "getRows()",
-        "getRowKeys()",
-        "getRowCount()",
-        "addRow(data: any)",
-        "removeRow(index: number)",
-        "updateRow(index: number, patch: any)",
-        "setRows(rows: any[])",
-        "isAddDisabled()",
-        "isRemoveDisabled(index: number)",
-        "getRowNode(index: number)",
-        "getRemoveButton(index: number)",
-        "getAddButton()",
-        "getContentHeight()"
+        "getRows",
+        "getRowKeys",
+        "getRowCount",
+        "addRow",
+        "removeRow",
+        "updateRow",
+        "setRows",
+        "isAddDisabled",
+        "isRemoveDisabled",
+        "getRowNode",
+        "getRemoveButton",
+        "getAddButton",
+        "getContentHeight"
       ],
       "value": {
         "kind": "none",
@@ -2061,7 +2087,8 @@
       "role": {
         "kind": "not-field",
         "reason": "重复行组（`initialRows` + `renderRow`）—— 它是\"一个字段\"的**复数形式**，形状是数组套字段，不是字段表能表达的。要做得新开一个 kind。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESelect": {
       "name": "ICESelect",
@@ -2180,33 +2207,33 @@
         }
       ],
       "methods": [
-        "setOverlayManager(manager: ICEOverlayManager)",
-        "getValue()",
-        "setValue(value: any)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "isOpen()",
-        "getFieldLabel()",
-        "getTagNodes()",
-        "getOverflowCount()",
-        "getOverflowLabel()",
-        "removeTag(value: string)",
-        "getQuery()",
-        "getVisibleOptions()",
-        "getOptionNode(value: string)",
-        "setOptions(options: ICESelectOption[])",
-        "activate()",
-        "toggle()",
-        "open()",
-        "close()",
-        "isVirtual()",
-        "isListScrollable()",
-        "getListScroll()",
-        "setListScroll(y: number)",
-        "getListContentHeight()",
-        "getRenderedOptionValues()",
-        "getSelectedOptionValues()",
-        "getActiveIndex()"
+        "setOverlayManager",
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "isOpen",
+        "getFieldLabel",
+        "getTagNodes",
+        "getOverflowCount",
+        "getOverflowLabel",
+        "removeTag",
+        "getQuery",
+        "getVisibleOptions",
+        "getOptionNode",
+        "setOptions",
+        "activate",
+        "toggle",
+        "open",
+        "close",
+        "isVirtual",
+        "isListScrollable",
+        "getListScroll",
+        "setListScroll",
+        "getListContentHeight",
+        "getRenderedOptionValues",
+        "getSelectedOptionValues",
+        "getActiveIndex"
       ],
       "value": {
         "kind": "union",
@@ -2216,7 +2243,8 @@
         "kind": "field",
         "fieldType": "select"
       },
-      "note": "值形状**取决于 `mode`**：single/tags → string，multiple → string[]。DSL 没有把这条建模进去（见 types.ts 的 ARRAY_FIELD_TYPES）。"
+      "initKey": "value",
+      "note": "值形状**取决于 `mode`**：single/tags → string，multiple → string[]。由 `fieldValueShape()` 按「类型 + 属性」算出来。"
     },
     "ICEAutoComplete": {
       "name": "ICEAutoComplete",
@@ -2299,30 +2327,31 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: string)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getFieldText()",
-        "setValidateStatus(status: any)",
-        "getValidateStatus()",
-        "isOpen()",
-        "getVisibleOptions()",
-        "getActiveIndex()",
-        "getOptionNode(value: string)",
-        "getPanel()",
-        "activate()",
-        "close()"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getFieldText",
+        "setValidateStatus",
+        "getValidateStatus",
+        "isOpen",
+        "getVisibleOptions",
+        "getActiveIndex",
+        "getOptionNode",
+        "getPanel",
+        "activate",
+        "close"
       ],
       "value": {
         "kind": "scalar",
         "type": "string"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "autocomplete"
+        "kind": "field",
+        "fieldType": "autocomplete"
       },
-      "note": "值是 string，但 `options` 是 `string[]` 而不是 `{value,label}[]`，与现有选项模型不同形。"
+      "initKey": "value",
+      "note": "候选是**裸字符串数组**（`options: string[]`）—— DSL 收 `[\"a\",\"b\"]` 这种写法，编译期归一化。初始值是 `\"\"` 而不是 undefined。"
     },
     "ICECascader": {
       "name": "ICECascader",
@@ -2411,31 +2440,32 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: string | null | undefined)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getPath()",
-        "getFieldLabel()",
-        "isOpen()",
-        "getPanel()",
-        "getColumnNodes()",
-        "getColumnNode(level: number)",
-        "getOptionNode(level: number, value: string)",
-        "activate()",
-        "toggle()",
-        "open()",
-        "close()"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getPath",
+        "getFieldLabel",
+        "isOpen",
+        "getPanel",
+        "getColumnNodes",
+        "getColumnNode",
+        "getOptionNode",
+        "activate",
+        "toggle",
+        "open",
+        "close"
       ],
       "value": {
         "kind": "scalar",
         "type": "string"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "cascader"
+        "kind": "field",
+        "fieldType": "cascader"
       },
-      "note": "值是**最深一层的 string**，但 `options` 是树；`getPath()` 才能回显上级 —— 往返语义不唯一，要设计。"
+      "initKey": "value",
+      "note": "值是最深一层的 string。选项是**树**，但形状就是现有选项加一个 `children`。注意**只有叶子可选**（诊断里的\"可用取值\"只列叶子）。"
     },
     "ICETreeSelect": {
       "name": "ICETreeSelect",
@@ -2542,35 +2572,36 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: any)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getFieldLabel()",
-        "getMode()",
-        "getSelectedLabels()",
-        "clear()",
-        "removeValue(key: string)",
-        "getQuery()",
-        "setQuery(query: string)",
-        "getMatchedKeys()",
-        "getFilteredNodes()",
-        "isOpen()",
-        "getTree()",
-        "activate()",
-        "toggle()",
-        "open()",
-        "close()"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getFieldLabel",
+        "getMode",
+        "getSelectedLabels",
+        "clear",
+        "removeValue",
+        "getQuery",
+        "setQuery",
+        "getMatchedKeys",
+        "getFilteredNodes",
+        "isOpen",
+        "getTree",
+        "activate",
+        "toggle",
+        "open",
+        "close"
       ],
       "value": {
         "kind": "union",
         "type": "string|string[]"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "tree-select"
+        "kind": "field",
+        "fieldType": "tree-select"
       },
-      "note": "值形状同样取决于 `mode`；且 `nodes` 是树而不是 `options`。"
+      "initKey": "value",
+      "note": "值形状取决于 `mode`（single → string / multiple → string[]）。节点的键名是 `key` 不是 `value`，编译期映射。**任何节点都能选**（与 cascader 不同）。"
     },
     "ICEDatePicker": {
       "name": "ICEDatePicker",
@@ -2671,23 +2702,23 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: string | null)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getFieldLabel()",
-        "isOpen()",
-        "getPanel()",
-        "getViewMonth()",
-        "setViewMonth(year: number, month: number)",
-        "prevMonth()",
-        "nextMonth()",
-        "getDayNode(date: string)",
-        "getDayCells()",
-        "activate()",
-        "toggle()",
-        "open()",
-        "close()"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getFieldLabel",
+        "isOpen",
+        "getPanel",
+        "getViewMonth",
+        "setViewMonth",
+        "prevMonth",
+        "nextMonth",
+        "getDayNode",
+        "getDayCells",
+        "activate",
+        "toggle",
+        "open",
+        "close"
       ],
       "value": {
         "kind": "scalar",
@@ -2696,7 +2727,8 @@
       "role": {
         "kind": "field",
         "fieldType": "date"
-      }
+      },
+      "initKey": "value"
     },
     "ICEDateRangePicker": {
       "name": "ICEDateRangePicker",
@@ -2815,45 +2847,46 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(start: string | null, end: string | null, options: { silent?: boolean })",
-        "isComplete()",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "clear()",
-        "getFieldParts()",
-        "getFieldText()",
-        "getPlaceholder()",
-        "isOpen()",
-        "getPanel()",
-        "activate()",
-        "toggle()",
-        "open()",
-        "close()",
-        "getViewMonth()",
-        "setViewMonth(year: number, month: number)",
-        "prevMonth()",
-        "nextMonth()",
-        "getDayCells()",
-        "getDayNode(date: string)",
-        "getPresetKeys()",
-        "getPresetNode(key: string)",
-        "getActivePresetKey()",
-        "applyPreset(key: string)",
-        "getClearNode()",
-        "isClearVisible()",
-        "getPanelLayout()",
-        "getPresetBoxes()"
+        "getValue",
+        "setValue",
+        "isComplete",
+        "getFormValue",
+        "setFormValue",
+        "clear",
+        "getFieldParts",
+        "getFieldText",
+        "getPlaceholder",
+        "isOpen",
+        "getPanel",
+        "activate",
+        "toggle",
+        "open",
+        "close",
+        "getViewMonth",
+        "setViewMonth",
+        "prevMonth",
+        "nextMonth",
+        "getDayCells",
+        "getDayNode",
+        "getPresetKeys",
+        "getPresetNode",
+        "getActivePresetKey",
+        "applyPreset",
+        "getClearNode",
+        "isClearVisible",
+        "getPanelLayout",
+        "getPresetBoxes"
       ],
       "value": {
         "kind": "tuple",
         "type": "[string|null,string|null]"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "date-range"
+        "kind": "field",
+        "fieldType": "date-range"
       },
-      "note": "值是**元组** `[string|null, string|null]`，且允许\"只选了一头\"的进行中状态 —— `required` 该表示\"两头都在\"还是\"至少一头\"是一个**语义决策**，不是实现问题。"
+      "initKey": "value",
+      "note": "值是**元组** `[起, 止]`。`required` 的语义在这里定案：**两头都在才算填完** —— 只选一头是\"进行中\"，而 `setFormValue` 对不完整区间会回落成 `[null, null]`（运行时证据），所以\"只选一头\"等价于没填。"
     },
     "ICETimePicker": {
       "name": "ICETimePicker",
@@ -2954,31 +2987,32 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: string | null | undefined)",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getUnits()",
-        "getColumnValues(unit: ICETimeUnit)",
-        "getFieldLabel()",
-        "isOpen()",
-        "getPanel()",
-        "getColumnNode(unit: ICETimeUnit)",
-        "getOptionNode(unit: ICETimeUnit, value: string)",
-        "activate()",
-        "toggle()",
-        "open()",
-        "close()"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getUnits",
+        "getColumnValues",
+        "getFieldLabel",
+        "isOpen",
+        "getPanel",
+        "getColumnNode",
+        "getOptionNode",
+        "activate",
+        "toggle",
+        "open",
+        "close"
       ],
       "value": {
         "kind": "scalar",
         "type": "string"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "time"
+        "kind": "field",
+        "fieldType": "time"
       },
-      "note": "值是 string（HH:mm[:ss]）。"
+      "initKey": "value",
+      "note": "值是 string。`format` 恰好是**字符串**联合（`HH:mm:ss` / `HH:mm`），所以能进 DSL —— 而 `date` 的 `format` 是函数，进不来。"
     },
     "ICEColorPicker": {
       "name": "ICEColorPicker",
@@ -3061,24 +3095,25 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(hex: string)",
-        "isSelected(hex: string)",
-        "getSwatchNodes()",
-        "getSwatchNode(color: string)",
-        "getRowCount()",
-        "getFormValue()",
-        "setFormValue(value: any)"
+        "getValue",
+        "setValue",
+        "isSelected",
+        "getSwatchNodes",
+        "getSwatchNode",
+        "getRowCount",
+        "getFormValue",
+        "setFormValue"
       ],
       "value": {
         "kind": "scalar",
         "type": "string"
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "color"
+        "kind": "field",
+        "fieldType": "color"
       },
-      "note": "值是 string（hex），形状干净。"
+      "initKey": "value",
+      "note": "组件的键名是 `colors: string[]`（不是 `options`），且 `setFormValue` 会把任何输入强制成 string —— 归一化与形状都由编译期兜住。"
     },
     "ICETransfer": {
       "name": "ICETransfer",
@@ -3149,32 +3184,33 @@
         }
       ],
       "methods": [
-        "getSourceKeys()",
-        "getTargetKeys()",
-        "setTargetKeys(keys: string[])",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getCheckedKeys()",
-        "isChecked(key: string)",
-        "getSourceNode(key: string)",
-        "getTargetNode(key: string)",
-        "getMoveRightButton()",
-        "getMoveLeftButton()",
-        "isMoveRightEnabled()",
-        "isMoveLeftEnabled()",
-        "moveRight()",
-        "moveLeft()",
-        "activate()"
+        "getSourceKeys",
+        "getTargetKeys",
+        "setTargetKeys",
+        "getFormValue",
+        "setFormValue",
+        "getCheckedKeys",
+        "isChecked",
+        "getSourceNode",
+        "getTargetNode",
+        "getMoveRightButton",
+        "getMoveLeftButton",
+        "isMoveRightEnabled",
+        "isMoveLeftEnabled",
+        "moveRight",
+        "moveLeft",
+        "activate"
       ],
       "value": {
         "kind": "none",
         "type": null
       },
       "role": {
-        "kind": "planned",
-        "plannedType": "transfer"
+        "kind": "field",
+        "fieldType": "transfer"
       },
-      "note": "**没有 `value`**，只有 `targetKeys: string[]` —— 要先把\"值\"定义出来才谈得上校验。"
+      "initKey": "targetKeys",
+      "note": "值是 `string[]`。候选池的键名是 `dataSource`（`{key,label}[]`）、值的键名是 `targetKeys` —— 两个键名都在编译期消化掉，DSL 侧只写 `options` + `default`。"
     },
     "ICETable": {
       "name": "ICETable",
@@ -3184,97 +3220,97 @@
       "summary": "表格：列定义（宽度 / 对齐 / 排序 / 自定义单元格）+ 行选择 + 分页 + 空态 + 悬停/斑马纹。",
       "props": [],
       "methods": [
-        "setData(data: ICETableRow[])",
-        "getTotalRows()",
-        "getPageCount()",
-        "getPage()",
-        "getPageSize()",
-        "setPage(page: number)",
-        "setPageSize(pageSize: number)",
-        "getPaginationNode()",
-        "getRows()",
-        "getSortState()",
-        "getFilterState()",
-        "setFilter(key: string, values: string[], options: { silent?: boolean })",
-        "clearFilters()",
-        "getFilteredRows()",
-        "getFilterNode(key: string)",
-        "isFilterOpen()",
-        "toggleFilter(key: string)",
-        "openFilter(key: string)",
-        "closeFilter()",
-        "getFilterOptionNode(key: string, value: string)",
-        "getFilterPanel()",
-        "getFilterPanelLayout()",
-        "isEditing()",
-        "getEditingCell()",
-        "getEditNode()",
-        "getEditError()",
-        "startEdit(rowIndex: number, key: string)",
-        "commitEdit()",
-        "cancelEdit()",
-        "getEditErrorNode()",
-        "getSummaryNode()",
-        "getSummaryText(key: string)",
-        "getExpandedRowKeys()",
-        "isRowExpanded(key: string | ICETableRow)",
-        "expandRow(key: string | ICETableRow, options: { silent?: boolean })",
-        "collapseRow(key: string | ICETableRow, options: { silent?: boolean })",
-        "toggleExpand(key: string | ICETableRow)",
-        "getExpandToggleNode(key: string | ICETableRow)",
-        "getExpandedRowNode(key: string | ICETableRow)",
-        "getRowNode(index: number)",
-        "getHeaderLabel(key: string)",
-        "toggleSort(key: string)",
-        "sortBy(key: string, order: 'asc' | 'desc' | null)",
-        "getTreeExpandedKeys()",
-        "isTreeRowExpanded(key: string)",
-        "isTreeParent(key: string)",
-        "toggleRowExpanded(key: string)",
-        "setTreeExpandedKeys(keys: string[])",
-        "getRowDepth(key: string)",
-        "getRowIndent(key: string)",
-        "getRowTreeToggle(key: string)",
-        "getSelectedRowKeys()",
-        "isTreeRowSelected(key: string)",
-        "setTreeRowSelected(key: string, selected: boolean)",
-        "moveTreeRow(dragKey: string, targetKey: string, position: 'before' | 'inside' | 'after')",
-        "getSelectionHintText()",
-        "getSelectionHintNode()",
-        "setSelectedRow(index: number)",
-        "getSelectedIndex()",
-        "getSelectionMode()",
-        "getSelectedIndexes()",
-        "getSelectedRows()",
-        "setSelectedIndexes(indexes: number[])",
-        "selectAll()",
-        "clearSelection()",
-        "getSelectionNode(index: number)",
-        "getHeaderCheckbox()",
-        "getColumnWidths()",
-        "getColumnState()",
-        "getColumnOrder()",
-        "getColumnDropIndicatorBox()",
-        "setColumnOrder(keys: string[])",
-        "moveColumn(from: number, to: number)",
-        "setColumnState(state: Partial<ICETableColumnState> | null | undefined)",
-        "setColumnWidth(key: string, width: number)",
-        "isResizable()",
-        "isResizing()",
-        "isVirtual()",
-        "isScrollable()",
-        "getRowRange()",
-        "getRenderedRowCount()",
-        "getScroll()",
-        "getContentHeight()",
-        "getFrozenWidth()",
-        "setScrollTop(y: number)",
-        "setScrollLeft(x: number)",
-        "scrollToRow(index: number)",
-        "isRowDraggable()",
-        "isRowDragging()",
-        "getDropTarget()",
-        "moveRow(from: number, target: ICEDropTarget)"
+        "setData",
+        "getTotalRows",
+        "getPageCount",
+        "getPage",
+        "getPageSize",
+        "setPage",
+        "setPageSize",
+        "getPaginationNode",
+        "getRows",
+        "getSortState",
+        "getFilterState",
+        "setFilter",
+        "clearFilters",
+        "getFilteredRows",
+        "getFilterNode",
+        "isFilterOpen",
+        "toggleFilter",
+        "openFilter",
+        "closeFilter",
+        "getFilterOptionNode",
+        "getFilterPanel",
+        "getFilterPanelLayout",
+        "isEditing",
+        "getEditingCell",
+        "getEditNode",
+        "getEditError",
+        "startEdit",
+        "commitEdit",
+        "cancelEdit",
+        "getEditErrorNode",
+        "getSummaryNode",
+        "getSummaryText",
+        "getExpandedRowKeys",
+        "isRowExpanded",
+        "expandRow",
+        "collapseRow",
+        "toggleExpand",
+        "getExpandToggleNode",
+        "getExpandedRowNode",
+        "getRowNode",
+        "getHeaderLabel",
+        "toggleSort",
+        "sortBy",
+        "getTreeExpandedKeys",
+        "isTreeRowExpanded",
+        "isTreeParent",
+        "toggleRowExpanded",
+        "setTreeExpandedKeys",
+        "getRowDepth",
+        "getRowIndent",
+        "getRowTreeToggle",
+        "getSelectedRowKeys",
+        "isTreeRowSelected",
+        "setTreeRowSelected",
+        "moveTreeRow",
+        "getSelectionHintText",
+        "getSelectionHintNode",
+        "setSelectedRow",
+        "getSelectedIndex",
+        "getSelectionMode",
+        "getSelectedIndexes",
+        "getSelectedRows",
+        "setSelectedIndexes",
+        "selectAll",
+        "clearSelection",
+        "getSelectionNode",
+        "getHeaderCheckbox",
+        "getColumnWidths",
+        "getColumnState",
+        "getColumnOrder",
+        "getColumnDropIndicatorBox",
+        "setColumnOrder",
+        "moveColumn",
+        "setColumnState",
+        "setColumnWidth",
+        "isResizable",
+        "isResizing",
+        "isVirtual",
+        "isScrollable",
+        "getRowRange",
+        "getRenderedRowCount",
+        "getScroll",
+        "getContentHeight",
+        "getFrozenWidth",
+        "setScrollTop",
+        "setScrollLeft",
+        "scrollToRow",
+        "isRowDraggable",
+        "isRowDragging",
+        "getDropTarget",
+        "moveRow"
       ],
       "value": {
         "kind": "unknown",
@@ -3283,7 +3319,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEList": {
       "name": "ICEList",
@@ -3354,17 +3391,17 @@
         }
       ],
       "methods": [
-        "getSelectedKeys()",
-        "setSelectedKeys(keys: string[])",
-        "getSelectionModel()",
-        "getActiveIndex()",
-        "clickRow(key: string)",
-        "getRowBox(key: string)",
-        "getScrollPane()",
-        "getItems()",
-        "setItems(items: ICEListItem[])",
-        "paintRows(ctx: any, theme: any, origin: [number, number])",
-        "initEvents()"
+        "getSelectedKeys",
+        "setSelectedKeys",
+        "getSelectionModel",
+        "getActiveIndex",
+        "clickRow",
+        "getRowBox",
+        "getScrollPane",
+        "getItems",
+        "setItems",
+        "paintRows",
+        "initEvents"
       ],
       "value": {
         "kind": "array",
@@ -3373,7 +3410,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETree": {
       "name": "ICETree",
@@ -3492,27 +3530,27 @@
         }
       ],
       "methods": [
-        "getExpandedKeys()",
-        "getNodes()",
-        "setExpandedKeys(keys: string[])",
-        "expandAll()",
-        "collapseAll()",
-        "getSelectedKeys()",
-        "setSelectedKeys(keys: string[])",
-        "getActiveKey()",
-        "getRowNode(key: string)",
-        "getVisibleNodes()",
-        "getRowDepth(key: string)",
-        "getScrollPane()",
-        "isVirtual()",
-        "getRenderedRowKeys()",
-        "getScrollTop()",
-        "getRowIndexAt(localY: number)",
-        "setScrollTop(y: number)",
-        "isDraggable()",
-        "isDragging()",
-        "getDropTarget()",
-        "moveNode(dragKey: string, targetKey: string, position: 'before' | 'inside' | 'after')"
+        "getExpandedKeys",
+        "getNodes",
+        "setExpandedKeys",
+        "expandAll",
+        "collapseAll",
+        "getSelectedKeys",
+        "setSelectedKeys",
+        "getActiveKey",
+        "getRowNode",
+        "getVisibleNodes",
+        "getRowDepth",
+        "getScrollPane",
+        "isVirtual",
+        "getRenderedRowKeys",
+        "getScrollTop",
+        "getRowIndexAt",
+        "setScrollTop",
+        "isDraggable",
+        "isDragging",
+        "getDropTarget",
+        "moveNode"
       ],
       "value": {
         "kind": "array",
@@ -3521,7 +3559,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICECard": {
       "name": "ICECard",
@@ -3531,10 +3570,10 @@
       "summary": "卡片：面板 + 标题，并提供右上角 extra 插槽（放“更多/操作”）。",
       "props": [],
       "methods": [
-        "setTitle(title: string)",
-        "setExtra(extra: any)",
-        "getExtraNode()",
-        "getTitleNode()"
+        "setTitle",
+        "setExtra",
+        "getExtraNode",
+        "getTitleNode"
       ],
       "value": {
         "kind": "unknown",
@@ -3543,7 +3582,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEStatCard": {
       "name": "ICEStatCard",
@@ -3553,9 +3593,9 @@
       "summary": "统计卡：图标 + 标题 + 数值 + 涨跌趋势，用于仪表盘顶部指标。",
       "props": [],
       "methods": [
-        "setValue(value: string | number)",
-        "setTitle(title: string)",
-        "setTrend(trend: string)"
+        "setValue",
+        "setTitle",
+        "setTrend"
       ],
       "value": {
         "kind": "unknown",
@@ -3564,7 +3604,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEStatistic": {
       "name": "ICEStatistic",
@@ -3671,17 +3712,17 @@
         }
       ],
       "methods": [
-        "getTitleText()",
-        "getValueText()",
-        "setTitle(title: string)",
-        "setValue(value: number | string)",
-        "getValue()",
-        "isCountdown()",
-        "getRemaining()",
-        "isRunning()",
-        "setCountdown(ms: number)",
-        "start()",
-        "stop()"
+        "getTitleText",
+        "getValueText",
+        "setTitle",
+        "setValue",
+        "getValue",
+        "isCountdown",
+        "getRemaining",
+        "isRunning",
+        "setCountdown",
+        "start",
+        "stop"
       ],
       "value": {
         "kind": "scalar",
@@ -3690,7 +3731,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEDescriptions": {
       "name": "ICEDescriptions",
@@ -3749,8 +3791,8 @@
         }
       ],
       "methods": [
-        "getRowNodes()",
-        "setItems(items: ICEDescriptionsItem[])"
+        "getRowNodes",
+        "setItems"
       ],
       "value": {
         "kind": "none",
@@ -3759,7 +3801,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETimeline": {
       "name": "ICETimeline",
@@ -3806,9 +3849,9 @@
         }
       ],
       "methods": [
-        "getItemNodes()",
-        "getDotColor(index: number)",
-        "setItems(items: ICETimelineItem[])"
+        "getItemNodes",
+        "getDotColor",
+        "setItems"
       ],
       "value": {
         "kind": "none",
@@ -3817,7 +3860,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEProgressBar": {
       "name": "ICEProgressBar",
@@ -3827,14 +3871,14 @@
       "summary": "进度环/进度条。",
       "props": [],
       "methods": [
-        "setValue(value: number)",
-        "getValue()",
-        "isCircle()",
-        "getPercent()",
-        "getSweepRatio()",
-        "getRingNode()",
-        "getTrackRingNode()",
-        "getTextNode()"
+        "setValue",
+        "getValue",
+        "isCircle",
+        "getPercent",
+        "getSweepRatio",
+        "getRingNode",
+        "getTrackRingNode",
+        "getTextNode"
       ],
       "value": {
         "kind": "unknown",
@@ -3843,7 +3887,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEImageView": {
       "name": "ICEImageView",
@@ -3853,17 +3898,17 @@
       "summary": "图片视图（基于引擎原语 ICEImage）。 名字带 View 后缀是为了避开引擎自己的 ICEImage（图片原语）——两个包同名不同物， 同时 import 会撞名，所以本库的控件一律叫 ICEImageView。",
       "props": [],
       "methods": [
-        "getSrc()",
-        "setSrc(src: string)",
-        "getFit()",
-        "setFit(fit: ICEImageFit)",
-        "isLoaded()",
-        "isErrored()",
-        "markError()",
-        "setNaturalSize(width: number, height: number)",
-        "getContentBox()",
-        "getViewportNode()",
-        "getImageNode()"
+        "getSrc",
+        "setSrc",
+        "getFit",
+        "setFit",
+        "isLoaded",
+        "isErrored",
+        "markError",
+        "setNaturalSize",
+        "getContentBox",
+        "getViewportNode",
+        "getImageNode"
       ],
       "value": {
         "kind": "unknown",
@@ -3872,7 +3917,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEImagePreview": {
       "name": "ICEImagePreview",
@@ -3949,28 +3995,28 @@
         }
       ],
       "methods": [
-        "isOpen()",
-        "getIndex()",
-        "getZoom()",
-        "getRotation()",
-        "getMask()",
-        "getFrame()",
-        "getImageNode()",
-        "getToolbarButton(name: ICEPreviewToolbarButton)",
-        "getImages()",
-        "open(index?: number)",
-        "close(reason: ICEImagePreviewCloseReason)",
-        "setIndex(index: number)",
-        "next()",
-        "prev()",
-        "zoomIn()",
-        "zoomOut()",
-        "rotateLeft()",
-        "rotateRight()",
-        "reset()",
-        "on(name: string, handler: (evt: any) => void)",
-        "off(name: string, handler: (evt: any) => void)",
-        "trigger(name: string, evt: any, param?: any)"
+        "isOpen",
+        "getIndex",
+        "getZoom",
+        "getRotation",
+        "getMask",
+        "getFrame",
+        "getImageNode",
+        "getToolbarButton",
+        "getImages",
+        "open",
+        "close",
+        "setIndex",
+        "next",
+        "prev",
+        "zoomIn",
+        "zoomOut",
+        "rotateLeft",
+        "rotateRight",
+        "reset",
+        "on",
+        "off",
+        "trigger"
       ],
       "value": {
         "kind": "none",
@@ -3979,7 +4025,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICECalendar": {
       "name": "ICECalendar",
@@ -4056,24 +4103,24 @@
         }
       ],
       "methods": [
-        "getValue()",
-        "setValue(value: any, options: { silent?: boolean })",
-        "getFormValue()",
-        "setFormValue(value: any)",
-        "getVisibleMonth()",
-        "setVisibleMonth(month: string, options: { silent?: boolean })",
-        "prevMonth()",
-        "nextMonth()",
-        "getTitleText()",
-        "getWeekdayTexts()",
-        "getCellNodes()",
-        "getCellNode(date: string)",
-        "getCellBackground(date: string)",
-        "getCellTextColor(date: string)",
-        "isToday(date: string)",
-        "selectDate(date: string)",
-        "getPrevButton()",
-        "getNextButton()"
+        "getValue",
+        "setValue",
+        "getFormValue",
+        "setFormValue",
+        "getVisibleMonth",
+        "setVisibleMonth",
+        "prevMonth",
+        "nextMonth",
+        "getTitleText",
+        "getWeekdayTexts",
+        "getCellNodes",
+        "getCellNode",
+        "getCellBackground",
+        "getCellTextColor",
+        "isToday",
+        "selectDate",
+        "getPrevButton",
+        "getNextButton"
       ],
       "value": {
         "kind": "scalar",
@@ -4082,7 +4129,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEAvatar": {
       "name": "ICEAvatar",
@@ -4092,8 +4140,8 @@
       "summary": "文字头像：取首字母/汉字，背景色可配，自带描边把相邻头像分开。 装饰（圆底 + 首字）由 painter 画，组件自己只保存文本、宽高与背景色。",
       "props": [],
       "methods": [
-        "setText(text: string)",
-        "getText()"
+        "setText",
+        "getText"
       ],
       "value": {
         "kind": "unknown",
@@ -4102,7 +4150,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEAvatarGroup": {
       "name": "ICEAvatarGroup",
@@ -4155,12 +4204,12 @@
         }
       ],
       "methods": [
-        "getCount()",
-        "getVisibleCount()",
-        "getRestCount()",
-        "getAvatarNodes()",
-        "getRestNode()",
-        "setAvatars(avatars: ICEAvatarGroupItem[])"
+        "getCount",
+        "getVisibleCount",
+        "getRestCount",
+        "getAvatarNodes",
+        "getRestNode",
+        "setAvatars"
       ],
       "value": {
         "kind": "none",
@@ -4169,7 +4218,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETag": {
       "name": "ICETag",
@@ -4179,7 +4229,7 @@
       "summary": "标签：默认 Bootstrap 实底（.text-bg-*），variant: 'soft' 切浅底 + 强调文字。",
       "props": [],
       "methods": [
-        "setText(text: string)"
+        "setText"
       ],
       "value": {
         "kind": "unknown",
@@ -4188,7 +4238,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEBadge": {
       "name": "ICEBadge",
@@ -4198,9 +4249,9 @@
       "summary": "徽标：数字/文字胶囊；dot 是红点模式，count 超过阈值自动显示 99+。",
       "props": [],
       "methods": [
-        "setText(text: string)",
-        "isDot()",
-        "getText()"
+        "setText",
+        "isDot",
+        "getText"
       ],
       "value": {
         "kind": "unknown",
@@ -4209,7 +4260,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICECarousel": {
       "name": "ICECarousel",
@@ -4310,22 +4362,22 @@
         }
       ],
       "methods": [
-        "getCount()",
-        "getIndex()",
-        "setSlides(slides: ICEWidget[])",
-        "getSlideNode(index: number)",
-        "getTrackNode()",
-        "getPrevButton()",
-        "getNextButton()",
-        "getDotNode(index: number)",
-        "isPlaying()",
-        "play()",
-        "pause()",
-        "setAutoplay(ms: number)",
-        "goTo(index: number, animate: boolean)",
-        "next()",
-        "prev()",
-        "activate()"
+        "getCount",
+        "getIndex",
+        "setSlides",
+        "getSlideNode",
+        "getTrackNode",
+        "getPrevButton",
+        "getNextButton",
+        "getDotNode",
+        "isPlaying",
+        "play",
+        "pause",
+        "setAutoplay",
+        "goTo",
+        "next",
+        "prev",
+        "activate"
       ],
       "value": {
         "kind": "none",
@@ -4334,7 +4386,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICECollapse": {
       "name": "ICECollapse",
@@ -4411,11 +4464,11 @@
         }
       ],
       "methods": [
-        "getActiveKeys()",
-        "setActiveKeys(keys: string[])",
-        "getHeaderNode(key: string)",
-        "getContentNode(key: string)",
-        "getItemTop(key: string)"
+        "getActiveKeys",
+        "setActiveKeys",
+        "getHeaderNode",
+        "getContentNode",
+        "getItemTop"
       ],
       "value": {
         "kind": "none",
@@ -4424,7 +4477,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEComment": {
       "name": "ICEComment",
@@ -4513,8 +4567,8 @@
         }
       ],
       "methods": [
-        "getActionButton(key: string)",
-        "getReplyNodes()"
+        "getActionButton",
+        "getReplyNodes"
       ],
       "value": {
         "kind": "none",
@@ -4523,7 +4577,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEWatermark": {
       "name": "ICEWatermark",
@@ -4606,11 +4661,11 @@
         }
       ],
       "methods": [
-        "getText()",
-        "getTileCount()",
-        "getTileNodes()",
-        "setText(text: string)",
-        "setSize(width: number, height: number)"
+        "getText",
+        "getTileCount",
+        "getTileNodes",
+        "setText",
+        "setSize"
       ],
       "value": {
         "kind": "none",
@@ -4619,7 +4674,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETileMap": {
       "name": "ICETileMap",
@@ -4720,28 +4776,28 @@
         }
       ],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getCellSize()",
-        "getGap()",
-        "setSize(rows: number, cols: number, cellSize?: number)",
-        "getCellRect(row: number, col: number)",
-        "getCellAt(x: number, y: number)",
-        "setTiles(tiles: Array<string | number | null> | Array<Array<string | number | null>>)",
-        "getTiles()",
-        "setLabels(labels: Array<string | number | null> | Array<Array<string | number | null>>)",
-        "getLabels()",
-        "setPalette(palette: ICETileMapPalette)",
-        "getPalette()",
-        "resolveCellStyle(key: string | null)",
-        "setHighlights(highlights: ICETileMapHighlight[])",
-        "getHighlights()",
-        "pulse(cells: ICETileMapPulse[], options: { duration?: number; color?: string; driver?: ICEFrameDriver })",
-        "getPulses()",
-        "getPulseAlpha()",
-        "getPaintCount()",
-        "paintBoard()",
-        "initEvents()"
+        "getRows",
+        "getCols",
+        "getCellSize",
+        "getGap",
+        "setSize",
+        "getCellRect",
+        "getCellAt",
+        "setTiles",
+        "getTiles",
+        "setLabels",
+        "getLabels",
+        "setPalette",
+        "getPalette",
+        "resolveCellStyle",
+        "setHighlights",
+        "getHighlights",
+        "pulse",
+        "getPulses",
+        "getPulseAlpha",
+        "getPaintCount",
+        "paintBoard",
+        "initEvents"
       ],
       "value": {
         "kind": "none",
@@ -4750,7 +4806,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEVirtualList": {
       "name": "ICEVirtualList",
@@ -4821,19 +4878,19 @@
         }
       ],
       "methods": [
-        "getItemCount()",
-        "getItemHeight()",
-        "getBuffer()",
-        "getItems()",
-        "getContentHeight()",
-        "getScrollTop()",
-        "getRange()",
-        "getRenderedCount()",
-        "getScrollPane()",
-        "setItems(items: any[])",
-        "setScrollTop(scrollTop: number)",
-        "scrollToIndex(index: number)",
-        "paintItems(ctx: any, origin: [number, number])"
+        "getItemCount",
+        "getItemHeight",
+        "getBuffer",
+        "getItems",
+        "getContentHeight",
+        "getScrollTop",
+        "getRange",
+        "getRenderedCount",
+        "getScrollPane",
+        "setItems",
+        "setScrollTop",
+        "scrollToIndex",
+        "paintItems"
       ],
       "value": {
         "kind": "none",
@@ -4842,7 +4899,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEKanban": {
       "name": "ICEKanban",
@@ -4919,13 +4977,13 @@
         }
       ],
       "methods": [
-        "getColumns()",
-        "getCardNode(key: string)",
-        "getColumnNode(key: string)",
-        "isDraggable()",
-        "isDragging()",
-        "getDropTarget()",
-        "moveCard(cardKey: string, columnKey: string, index: number)"
+        "getColumns",
+        "getCardNode",
+        "getColumnNode",
+        "isDraggable",
+        "isDragging",
+        "getDropTarget",
+        "moveCard"
       ],
       "value": {
         "kind": "none",
@@ -4934,7 +4992,8 @@
       "role": {
         "kind": "not-field",
         "reason": "数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEAlert": {
       "name": "ICEAlert",
@@ -4944,17 +5003,17 @@
       "summary": "提示条：info / success / warning / error 四种状态 + 类型图标，可关闭。",
       "props": [],
       "methods": [
-        "isBanner()",
-        "getActionNode()",
-        "setTitle(title: string)",
-        "setMessage(message: string)",
-        "getType()",
-        "getIconNode()",
-        "getTitleNode()",
-        "close()",
-        "isClosed()",
-        "isClosable()",
-        "getCloseButton()"
+        "isBanner",
+        "getActionNode",
+        "setTitle",
+        "setMessage",
+        "getType",
+        "getIconNode",
+        "getTitleNode",
+        "close",
+        "isClosed",
+        "isClosable",
+        "getCloseButton"
       ],
       "value": {
         "kind": "unknown",
@@ -4963,7 +5022,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEModal": {
       "name": "ICEModal",
@@ -5106,22 +5166,22 @@
         }
       ],
       "methods": [
-        "isOpen()",
-        "getMask()",
-        "getDialog()",
-        "isDraggable()",
-        "isResizable()",
-        "isFullscreen()",
-        "getDialogRect()",
-        "setPosition(left: number, top: number)",
-        "dragBy(dx: number, dy: number)",
-        "setSize(width: number, height: number)",
-        "toggleFullscreen()",
-        "setFullscreen(full: boolean)",
-        "getConfirmButton()",
-        "getCancelButton()",
-        "open()",
-        "close(reason: ICEModalCloseReason)"
+        "isOpen",
+        "getMask",
+        "getDialog",
+        "isDraggable",
+        "isResizable",
+        "isFullscreen",
+        "getDialogRect",
+        "setPosition",
+        "dragBy",
+        "setSize",
+        "toggleFullscreen",
+        "setFullscreen",
+        "getConfirmButton",
+        "getCancelButton",
+        "open",
+        "close"
       ],
       "value": {
         "kind": "none",
@@ -5130,7 +5190,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEDrawer": {
       "name": "ICEDrawer",
@@ -5237,15 +5298,15 @@
         }
       ],
       "methods": [
-        "isOpen()",
-        "getMask()",
-        "getPanel()",
-        "getCloseButton()",
-        "getExtraNode()",
-        "getFooterNode()",
-        "getContentBox()",
-        "open()",
-        "close(reason: ICEDrawerCloseReason)"
+        "isOpen",
+        "getMask",
+        "getPanel",
+        "getCloseButton",
+        "getExtraNode",
+        "getFooterNode",
+        "getContentBox",
+        "open",
+        "close"
       ],
       "value": {
         "kind": "none",
@@ -5254,7 +5315,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEMessage": {
       "name": "ICEMessage",
@@ -5271,7 +5333,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICENotification": {
       "name": "ICENotification",
@@ -5288,7 +5351,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETooltip": {
       "name": "ICETooltip",
@@ -5347,11 +5411,11 @@
         }
       ],
       "methods": [
-        "start()",
-        "destroy()",
-        "isOpen()",
-        "show()",
-        "hide()"
+        "start",
+        "destroy",
+        "isOpen",
+        "show",
+        "hide"
       ],
       "value": {
         "kind": "none",
@@ -5360,7 +5424,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEPopover": {
       "name": "ICEPopover",
@@ -5437,12 +5502,12 @@
         }
       ],
       "methods": [
-        "start()",
-        "destroy()",
-        "isOpen()",
-        "show()",
-        "hide()",
-        "toggle()"
+        "start",
+        "destroy",
+        "isOpen",
+        "show",
+        "hide",
+        "toggle"
       ],
       "value": {
         "kind": "none",
@@ -5451,7 +5516,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEPopconfirm": {
       "name": "ICEPopconfirm",
@@ -5505,7 +5571,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEResult": {
       "name": "ICEResult",
@@ -5576,7 +5643,7 @@
         }
       ],
       "methods": [
-        "getActionButton(key: string)"
+        "getActionButton"
       ],
       "value": {
         "kind": "none",
@@ -5585,7 +5652,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEEmpty": {
       "name": "ICEEmpty",
@@ -5650,8 +5718,8 @@
         }
       ],
       "methods": [
-        "getActionButton()",
-        "getDescription()"
+        "getActionButton",
+        "getDescription"
       ],
       "value": {
         "kind": "none",
@@ -5660,7 +5728,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESkeleton": {
       "name": "ICESkeleton",
@@ -5731,12 +5800,12 @@
         }
       ],
       "methods": [
-        "getVariant()",
-        "getPlaceholderCount()",
-        "getRowCount()",
-        "getColumnCount()",
-        "isActive()",
-        "setActive(active: boolean)"
+        "getVariant",
+        "getPlaceholderCount",
+        "getRowCount",
+        "getColumnCount",
+        "isActive",
+        "setActive"
       ],
       "value": {
         "kind": "none",
@@ -5745,7 +5814,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESpin": {
       "name": "ICESpin",
@@ -5792,9 +5862,9 @@
         }
       ],
       "methods": [
-        "isSpinning()",
-        "getArcNode()",
-        "setSpinning(spinning: boolean)"
+        "isSpinning",
+        "getArcNode",
+        "setSpinning"
       ],
       "value": {
         "kind": "none",
@@ -5803,7 +5873,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESteps": {
       "name": "ICESteps",
@@ -5862,9 +5933,9 @@
         }
       ],
       "methods": [
-        "getCurrent()",
-        "setCurrent(current: number)",
-        "getStepNode(index: number)"
+        "getCurrent",
+        "setCurrent",
+        "getStepNode"
       ],
       "value": {
         "kind": "none",
@@ -5873,7 +5944,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETour": {
       "name": "ICETour",
@@ -5944,28 +6016,28 @@
         }
       ],
       "methods": [
-        "isOpen()",
-        "isFinished()",
-        "getCurrent()",
-        "getCurrentStep()",
-        "getSteps()",
-        "getPanel()",
-        "getMask()",
-        "getHighlightNode()",
-        "getTitleText()",
-        "getDescriptionText()",
-        "getCounterText()",
-        "getNextButton()",
-        "getPrevButton()",
-        "getSkipButton()",
-        "getHighlightBox()",
-        "setSteps(steps: ICETourStep[])",
-        "open(index?: number)",
-        "close(reason: ICETourCloseReason)",
-        "next()",
-        "prev()",
-        "finish()",
-        "skip()"
+        "isOpen",
+        "isFinished",
+        "getCurrent",
+        "getCurrentStep",
+        "getSteps",
+        "getPanel",
+        "getMask",
+        "getHighlightNode",
+        "getTitleText",
+        "getDescriptionText",
+        "getCounterText",
+        "getNextButton",
+        "getPrevButton",
+        "getSkipButton",
+        "getHighlightBox",
+        "setSteps",
+        "open",
+        "close",
+        "next",
+        "prev",
+        "finish",
+        "skip"
       ],
       "value": {
         "kind": "none",
@@ -5974,7 +6046,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEFloatButton": {
       "name": "ICEFloatButton",
@@ -6057,14 +6130,14 @@
         }
       ],
       "methods": [
-        "isExpanded()",
-        "getItemNode(key: string)",
-        "getItems()",
-        "getButtonColor()",
-        "expand()",
-        "collapse()",
-        "toggle()",
-        "activate()"
+        "isExpanded",
+        "getItemNode",
+        "getItems",
+        "getButtonColor",
+        "expand",
+        "collapse",
+        "toggle",
+        "activate"
       ],
       "value": {
         "kind": "none",
@@ -6073,7 +6146,8 @@
       "role": {
         "kind": "not-field",
         "reason": "反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟\"两块并排画布\"的卡片结构会打架；其余是页面级状态。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEMenu": {
       "name": "ICEMenu",
@@ -6083,32 +6157,32 @@
       "summary": "",
       "props": [],
       "methods": [
-        "setSelectedKey(key: string | null)",
-        "getSelectedKey()",
-        "getVisibleItems()",
-        "getItemNode(key: string)",
-        "isExpanded(key: string)",
-        "toggleExpand(key: string)",
-        "setExpandedKeys(keys: string[])",
-        "activateItem(key: string)",
-        "getMode()",
-        "isCollapsed()",
-        "getExpandAnimation()",
-        "setExpandAnimation(duration: number)",
-        "isAnimating(key: string)",
-        "getItemBox(key: string)",
-        "setCollapsed(collapsed: boolean)",
-        "isLabelVisible(key: string)",
-        "hasIcon(key: string)",
-        "getItemBoxes()",
-        "isSubmenuOpen()",
-        "getSubmenuKey()",
-        "getSubmenuIndicator(key: string)",
-        "getSubmenuItemNode(key: string)",
-        "closeSubmenu()",
-        "openSubmenu(key: string)",
-        "getActiveKey()",
-        "setActiveKey(key: string | null)"
+        "setSelectedKey",
+        "getSelectedKey",
+        "getVisibleItems",
+        "getItemNode",
+        "isExpanded",
+        "toggleExpand",
+        "setExpandedKeys",
+        "activateItem",
+        "getMode",
+        "isCollapsed",
+        "getExpandAnimation",
+        "setExpandAnimation",
+        "isAnimating",
+        "getItemBox",
+        "setCollapsed",
+        "isLabelVisible",
+        "hasIcon",
+        "getItemBoxes",
+        "isSubmenuOpen",
+        "getSubmenuKey",
+        "getSubmenuIndicator",
+        "getSubmenuItemNode",
+        "closeSubmenu",
+        "openSubmenu",
+        "getActiveKey",
+        "setActiveKey"
       ],
       "value": {
         "kind": "unknown",
@@ -6117,7 +6191,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEBreadcrumb": {
       "name": "ICEBreadcrumb",
@@ -6188,13 +6263,13 @@
         }
       ],
       "methods": [
-        "getLabelTexts()",
-        "getItemNodes()",
-        "getSeparatorNodes()",
-        "getItems()",
-        "isCollapsed()",
-        "expand()",
-        "setItems(items: ICEBreadcrumbItem[])"
+        "getLabelTexts",
+        "getItemNodes",
+        "getSeparatorNodes",
+        "getItems",
+        "isCollapsed",
+        "expand",
+        "setItems"
       ],
       "value": {
         "kind": "none",
@@ -6203,7 +6278,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEAnchor": {
       "name": "ICEAnchor",
@@ -6274,13 +6350,13 @@
         }
       ],
       "methods": [
-        "getActiveKey()",
-        "getLabelTexts()",
-        "getItemNode(key: string)",
-        "getLabelColor(key: string)",
-        "setActiveKey(key: string, options: { scroll?: boolean })",
-        "getItems()",
-        "setItems(items: ICEAnchorItem[])"
+        "getActiveKey",
+        "getLabelTexts",
+        "getItemNode",
+        "getLabelColor",
+        "setActiveKey",
+        "getItems",
+        "setItems"
       ],
       "value": {
         "kind": "none",
@@ -6289,7 +6365,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEBackTop": {
       "name": "ICEBackTop",
@@ -6348,9 +6425,9 @@
         }
       ],
       "methods": [
-        "isVisible()",
-        "getButtonColor()",
-        "setTarget(target: any)"
+        "isVisible",
+        "getButtonColor",
+        "setTarget"
       ],
       "value": {
         "kind": "none",
@@ -6359,7 +6436,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEDropdown": {
       "name": "ICEDropdown",
@@ -6418,17 +6496,17 @@
         }
       ],
       "methods": [
-        "start()",
-        "destroy()",
-        "isOpen()",
-        "getSelectedKey()",
-        "setSelectedKey(key: string | null)",
-        "getActiveIndex()",
-        "getItemNode(index: number)",
-        "setItems(items: ICEDropdownItem[])",
-        "open()",
-        "close()",
-        "toggle()"
+        "start",
+        "destroy",
+        "isOpen",
+        "getSelectedKey",
+        "setSelectedKey",
+        "getActiveIndex",
+        "getItemNode",
+        "setItems",
+        "open",
+        "close",
+        "toggle"
       ],
       "value": {
         "kind": "none",
@@ -6437,7 +6515,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEPagination": {
       "name": "ICEPagination",
@@ -6526,17 +6605,17 @@
         }
       ],
       "methods": [
-        "getTotal()",
-        "getPageCount()",
-        "getCurrent()",
-        "getPageSize()",
-        "getPrevButton()",
-        "getNextButton()",
-        "getPageButton(page: number)",
-        "getSizeChanger()",
-        "setTotal(total: number)",
-        "setCurrent(page: number, options: { silent?: boolean })",
-        "setPageSize(pageSize: number, options: { silent?: boolean })"
+        "getTotal",
+        "getPageCount",
+        "getCurrent",
+        "getPageSize",
+        "getPrevButton",
+        "getNextButton",
+        "getPageButton",
+        "getSizeChanger",
+        "setTotal",
+        "setCurrent",
+        "setPageSize"
       ],
       "value": {
         "kind": "none",
@@ -6545,7 +6624,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETabs": {
       "name": "ICETabs",
@@ -6555,26 +6635,26 @@
       "summary": "",
       "props": [],
       "methods": [
-        "getPlacement()",
-        "isReordering()",
-        "getActiveLabel()",
-        "getActiveIndex()",
-        "setActiveIndex(index: number)",
-        "getTabs()",
-        "getType()",
-        "isClosable()",
-        "getExtra()",
-        "isOverflow()",
-        "getScrollOffset()",
-        "getViewportWidth()",
-        "getMaxScroll()",
-        "setScrollOffset(offset: number)",
-        "scrollBy(delta: number)",
-        "scrollIntoView(index: number)",
-        "getPrevButton()",
-        "getNextButton()",
-        "getTabBoxes()",
-        "closeTab(index: number)"
+        "getPlacement",
+        "isReordering",
+        "getActiveLabel",
+        "getActiveIndex",
+        "setActiveIndex",
+        "getTabs",
+        "getType",
+        "isClosable",
+        "getExtra",
+        "isOverflow",
+        "getScrollOffset",
+        "getViewportWidth",
+        "getMaxScroll",
+        "setScrollOffset",
+        "scrollBy",
+        "scrollIntoView",
+        "getPrevButton",
+        "getNextButton",
+        "getTabBoxes",
+        "closeTab"
       ],
       "value": {
         "kind": "unknown",
@@ -6583,7 +6663,8 @@
       "role": {
         "kind": "not-field",
         "reason": "导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEScrollPane": {
       "name": "ICEScrollPane",
@@ -6630,23 +6711,23 @@
         }
       ],
       "methods": [
-        "setContent(node: any)",
-        "getContent()",
-        "setContentSize(width: number, height: number)",
-        "getContentSize()",
-        "getViewportSize()",
-        "getScrollRange()",
-        "getScroll()",
-        "setScroll(x: number, y: number)",
-        "scrollBy(dx: number, dy: number)",
-        "isScrollbarVisible()",
-        "getScrollbarThumb()",
-        "isHorizontalScrollbarVisible()",
-        "getHorizontalTrackWidth()",
-        "getHorizontalThumb()",
-        "smoothScrollTo(x: number, y: number, options: { duration?: number })",
-        "isThumbDragging()",
-        "getVerticalTrackHeight()"
+        "setContent",
+        "getContent",
+        "setContentSize",
+        "getContentSize",
+        "getViewportSize",
+        "getScrollRange",
+        "getScroll",
+        "setScroll",
+        "scrollBy",
+        "isScrollbarVisible",
+        "getScrollbarThumb",
+        "isHorizontalScrollbarVisible",
+        "getHorizontalTrackWidth",
+        "getHorizontalThumb",
+        "smoothScrollTo",
+        "isThumbDragging",
+        "getVerticalTrackHeight"
       ],
       "value": {
         "kind": "none",
@@ -6655,7 +6736,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEAffix": {
       "name": "ICEAffix",
@@ -6738,13 +6820,13 @@
         }
       ],
       "methods": [
-        "getScrollTarget()",
-        "getOffsetTop()",
-        "setOffsetTop(value: number)",
-        "getBaseTop()",
-        "getBaseZIndex()",
-        "isPinned()",
-        "update()"
+        "getScrollTarget",
+        "getOffsetTop",
+        "setOffsetTop",
+        "getBaseTop",
+        "getBaseZIndex",
+        "isPinned",
+        "update"
       ],
       "value": {
         "kind": "none",
@@ -6753,7 +6835,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICELayout": {
       "name": "ICELayout",
@@ -6854,22 +6937,22 @@
         }
       ],
       "methods": [
-        "setHeader(node: any)",
-        "setSider(node: any)",
-        "setContent(node: any)",
-        "setFooter(node: any)",
-        "getHeader()",
-        "getSider()",
-        "getContent()",
-        "getFooter()",
-        "setSiderWidth(width: number)",
-        "getSiderWidth()",
-        "setSiderVisible(visible: boolean)",
-        "isSiderVisible()",
-        "setHeaderHeight(height: number)",
-        "setFooterHeight(height: number)",
-        "getRegionBox(name: ICELayoutRegion)",
-        "layout()"
+        "setHeader",
+        "setSider",
+        "setContent",
+        "setFooter",
+        "getHeader",
+        "getSider",
+        "getContent",
+        "getFooter",
+        "setSiderWidth",
+        "getSiderWidth",
+        "setSiderVisible",
+        "isSiderVisible",
+        "setHeaderHeight",
+        "setFooterHeight",
+        "getRegionBox",
+        "layout"
       ],
       "value": {
         "kind": "none",
@@ -6878,7 +6961,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESplitter": {
       "name": "ICESplitter",
@@ -6961,16 +7045,16 @@
         }
       ],
       "methods": [
-        "getSize()",
-        "getRatio()",
-        "setRatio(ratio: number)",
-        "setSize(size: number)",
-        "getDividerNode()",
-        "getFirstNode()",
-        "getSecondNode()",
-        "getDirection()",
-        "getDividerSize()",
-        "isDragging()"
+        "getSize",
+        "getRatio",
+        "setRatio",
+        "setSize",
+        "getDividerNode",
+        "getFirstNode",
+        "getSecondNode",
+        "getDirection",
+        "getDividerSize",
+        "isDragging"
       ],
       "value": {
         "kind": "none",
@@ -6979,7 +7063,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEWindow": {
       "name": "ICEWindow",
@@ -7146,29 +7231,29 @@
         }
       ],
       "methods": [
-        "getTitle()",
-        "setTitle(title: string)",
-        "getTitleBar()",
-        "getTitleBarHeight()",
-        "getClientBox()",
-        "getClientNode()",
-        "getCloseButton()",
-        "getMinimizeButton()",
-        "getMaximizeButton()",
-        "getResizeHandle()",
-        "getTitleBarColor()",
-        "isActive()",
-        "setActive(active: boolean)",
-        "activate()",
-        "isMaximized()",
-        "maximize()",
-        "restore()",
-        "setContent(node: any)",
-        "getContent()",
-        "isDragging()",
-        "isResizing()",
-        "setBounds(bounds: { left: number; top: number; width: number; height: number })",
-        "setSize(width: number, height: number)"
+        "getTitle",
+        "setTitle",
+        "getTitleBar",
+        "getTitleBarHeight",
+        "getClientBox",
+        "getClientNode",
+        "getCloseButton",
+        "getMinimizeButton",
+        "getMaximizeButton",
+        "getResizeHandle",
+        "getTitleBarColor",
+        "isActive",
+        "setActive",
+        "activate",
+        "isMaximized",
+        "maximize",
+        "restore",
+        "setContent",
+        "getContent",
+        "isDragging",
+        "isResizing",
+        "setBounds",
+        "setSize"
       ],
       "value": {
         "kind": "none",
@@ -7177,7 +7262,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEOverlayManager": {
       "name": "ICEOverlayManager",
@@ -7187,14 +7273,14 @@
       "summary": "弹层/浮层底座。 所有需要「浮在其它组件之上」的组件（Modal、Dropdown、Select、Tooltip、Popover、 右键菜单…）都走这一层，避免每个组件各自实现锚点定位、z 序、点外关闭、Esc 关闭。 实现要点：",
       "props": [],
       "methods": [
-        "start()",
-        "stop()",
-        "open(options: ICEOverlayOptions)",
-        "close(handle: ICEOverlayHandle, reason: ICEOverlayCloseReason)",
-        "closeAll(reason: ICEOverlayCloseReason)",
-        "isOpen()",
-        "isKeyboardCaptured()",
-        "getLayer()"
+        "start",
+        "stop",
+        "open",
+        "close",
+        "closeAll",
+        "isOpen",
+        "isKeyboardCaptured",
+        "getLayer"
       ],
       "value": {
         "kind": "unknown",
@@ -7203,7 +7289,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEFocusManager": {
       "name": "ICEFocusManager",
@@ -7213,18 +7300,18 @@
       "summary": "键盘焦点与焦点环。 引擎只负责「键盘事件派发给谁」（ice.setFocusedComponent + DOMEventDispatcher）， 上层的策略在这里：",
       "props": [],
       "methods": [
-        "start()",
-        "stop()",
-        "getFocused()",
-        "getRing()",
-        "getFocusOrigin()",
-        "isRingVisible()",
-        "getFocusables()",
-        "setFocusScope(container: any)",
-        "getFocusScope()",
-        "focus(component: any, options: { origin?: 'mouse' | 'keyboard' | 'api' })",
-        "focusNext()",
-        "focusPrev()"
+        "start",
+        "stop",
+        "getFocused",
+        "getRing",
+        "getFocusOrigin",
+        "isRingVisible",
+        "getFocusables",
+        "setFocusScope",
+        "getFocusScope",
+        "focus",
+        "focusNext",
+        "focusPrev"
       ],
       "value": {
         "kind": "unknown",
@@ -7233,7 +7320,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEHoverManager": {
       "name": "ICEHoverManager",
@@ -7243,9 +7331,9 @@
       "summary": "ICE 内核的移动类事件为了性能不会在 mousemove 时做全量命中检测， 因此 Canvas 组件没有内置 mouseenter/mouseleave 语义。 ICEHoverManager 通过事件总线的 mousemove + ice.hitTest() 自己维护当前 hover 组件， 并把状态同步到带 setHovered() 的 ICEWidget 上，实现接近 HTML 组件的 hover 效果。",
       "props": [],
       "methods": [
-        "start()",
-        "stop()",
-        "getHoveredComponent()"
+        "start",
+        "stop",
+        "getHoveredComponent"
       ],
       "value": {
         "kind": "unknown",
@@ -7254,7 +7342,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEMessageManager": {
       "name": "ICEMessageManager",
@@ -7264,13 +7353,13 @@
       "summary": "全局提示（Message / Notification）。",
       "props": [],
       "methods": [
-        "start()",
-        "stop()",
-        "getLayer()",
-        "show(options: ICEMessageOptions)",
-        "notification(options: ICENotificationOptions)",
-        "closeAll()",
-        "isOpen()"
+        "start",
+        "stop",
+        "getLayer",
+        "show",
+        "notification",
+        "closeAll",
+        "isOpen"
       ],
       "value": {
         "kind": "unknown",
@@ -7279,7 +7368,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEManager": {
       "name": "ICEManager",
@@ -7289,14 +7379,14 @@
       "summary": "主题管理单例（iceUIManager）：持有当前 token 表，组件构造时从这里取主题。",
       "props": [],
       "methods": [
-        "setDensity(density: ICEDensity)",
-        "getDensity()",
-        "setTheme(name: ICEThemeName, ice?: any)",
-        "getThemeName()",
-        "registerTheme(name: string, tokens: ICEThemeTokens)",
-        "hasTheme(name: string)",
-        "getThemeNames()",
-        "getTheme()"
+        "setDensity",
+        "getDensity",
+        "setTheme",
+        "getThemeName",
+        "registerTheme",
+        "hasTheme",
+        "getThemeNames",
+        "getTheme"
       ],
       "value": {
         "kind": "unknown",
@@ -7305,7 +7395,8 @@
       "role": {
         "kind": "not-field",
         "reason": "核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。"
-      }
+      },
+      "initKey": "value"
     },
     "attachTooltip": {
       "name": "attachTooltip",
@@ -7322,7 +7413,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICENativeInput": {
       "name": "ICENativeInput",
@@ -7399,14 +7491,14 @@
         }
       ],
       "methods": [
-        "isMounted()",
-        "getElement()",
-        "getValue()",
-        "mount()",
-        "unmount()",
-        "setValue(value: string)",
-        "focus()",
-        "setCaretColor(color: string)"
+        "isMounted",
+        "getElement",
+        "getValue",
+        "mount",
+        "unmount",
+        "setValue",
+        "focus",
+        "setCaretColor"
       ],
       "value": {
         "kind": "scalar",
@@ -7415,7 +7507,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "computeVirtualRange": {
       "name": "computeVirtualRange",
@@ -7432,7 +7525,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "resolveColumnWidths": {
       "name": "resolveColumnWidths",
@@ -7449,7 +7543,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "computeDropTarget": {
       "name": "computeDropTarget",
@@ -7466,7 +7561,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "moveItem": {
       "name": "moveItem",
@@ -7483,7 +7579,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "moveKanbanCard": {
       "name": "moveKanbanCard",
@@ -7500,7 +7597,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "mountICEAccessibilityMirror": {
       "name": "mountICEAccessibilityMirror",
@@ -7517,7 +7615,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "setICELocale": {
       "name": "setICELocale",
@@ -7534,7 +7633,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICELocale": {
       "name": "getICELocale",
@@ -7551,7 +7651,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICELocaleNames": {
       "name": "getICELocaleNames",
@@ -7568,7 +7669,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "registerICELocale": {
       "name": "registerICELocale",
@@ -7585,7 +7687,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICELocaleMessages": {
       "name": "getICELocaleMessages",
@@ -7602,7 +7705,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "t": {
       "name": "t",
@@ -7619,7 +7723,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_DEFAULT_LOCALE": {
       "name": "ICE_DEFAULT_LOCALE",
@@ -7636,7 +7741,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_LOCALE_ZH_CN": {
       "name": "ICE_LOCALE_ZH_CN",
@@ -7653,7 +7759,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_LOCALE_EN_US": {
       "name": "ICE_LOCALE_EN_US",
@@ -7670,7 +7777,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "attachPopover": {
       "name": "attachPopover",
@@ -7687,7 +7795,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "attachPopconfirm": {
       "name": "attachPopconfirm",
@@ -7704,7 +7813,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "attachDropdown": {
       "name": "attachDropdown",
@@ -7721,7 +7831,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "openModal": {
       "name": "openModal",
@@ -7738,7 +7849,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "openDrawer": {
       "name": "openDrawer",
@@ -7755,7 +7867,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICEOverlayManager": {
       "name": "getICEOverlayManager",
@@ -7772,7 +7885,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICEFocusManager": {
       "name": "getICEFocusManager",
@@ -7789,7 +7903,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICEMessageManager": {
       "name": "getICEMessageManager",
@@ -7806,7 +7921,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getICEWorldBox": {
       "name": "getICEWorldBox",
@@ -7823,7 +7939,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "tween": {
       "name": "tween",
@@ -7840,7 +7957,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "fadeIn": {
       "name": "fadeIn",
@@ -7857,7 +7975,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "fadeOut": {
       "name": "fadeOut",
@@ -7874,7 +7993,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "fadeTo": {
       "name": "fadeTo",
@@ -7891,7 +8011,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "slideIn": {
       "name": "slideIn",
@@ -7908,7 +8029,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "scaleIn": {
       "name": "scaleIn",
@@ -7925,7 +8047,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "estimateTextWidth": {
       "name": "estimateTextWidth",
@@ -7942,7 +8065,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "formatStatisticValue": {
       "name": "formatStatisticValue",
@@ -7959,7 +8083,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "formatCountdown": {
       "name": "formatCountdown",
@@ -7976,7 +8101,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "truncateTextLines": {
       "name": "truncateTextLines",
@@ -7993,7 +8119,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "openImagePreview": {
       "name": "openImagePreview",
@@ -8010,7 +8137,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "formatCalendarDate": {
       "name": "formatCalendarDate",
@@ -8027,7 +8155,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "buildMonthGrid": {
       "name": "buildMonthGrid",
@@ -8044,7 +8173,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "tooltipPanelWidth": {
       "name": "tooltipPanelWidth",
@@ -8061,7 +8191,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "readHovered": {
       "name": "readHovered",
@@ -8078,7 +8209,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "createTextNode": {
       "name": "createTextNode",
@@ -8095,7 +8227,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "centerTextNode": {
       "name": "centerTextNode",
@@ -8112,7 +8245,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "getStatusColors": {
       "name": "getStatusColors",
@@ -8129,7 +8263,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "resolveICEEasing": {
       "name": "resolveICEEasing",
@@ -8146,7 +8281,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "easeInQuad": {
       "name": "easeInQuad",
@@ -8163,7 +8299,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "easeOutCubic": {
       "name": "easeOutCubic",
@@ -8180,7 +8317,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "easeInOutCubic": {
       "name": "easeInOutCubic",
@@ -8197,7 +8335,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "resolveICEOverlayPosition": {
       "name": "resolveICEOverlayPosition",
@@ -8214,7 +8353,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "isPointInsideICEBox": {
       "name": "isPointInsideICEBox",
@@ -8231,7 +8371,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "iceUIManager": {
       "name": "iceUIManager",
@@ -8248,7 +8389,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_LIGHT_THEME": {
       "name": "ICE_LIGHT_THEME",
@@ -8265,7 +8407,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_DARK_THEME": {
       "name": "ICE_DARK_THEME",
@@ -8282,7 +8425,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_HIGH_CONTRAST_THEME": {
       "name": "ICE_HIGH_CONTRAST_THEME",
@@ -8299,7 +8443,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_XP_THEME": {
       "name": "ICE_XP_THEME",
@@ -8316,7 +8461,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_ARCADE_THEME": {
       "name": "ICE_ARCADE_THEME",
@@ -8333,7 +8479,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_ARCADE_PALETTE": {
       "name": "ICE_ARCADE_PALETTE",
@@ -8350,7 +8497,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEButtonModel": {
       "name": "ICEButtonModel",
@@ -8360,12 +8508,12 @@
       "summary": "",
       "props": [],
       "methods": [
-        "isEnabled()",
-        "setEnabled(enabled: boolean)",
-        "isPressed()",
-        "setPressed(pressed: boolean)",
-        "addChangeListener(listener: ICEButtonModelListener)",
-        "removeChangeListener(listener: ICEButtonModelListener)"
+        "isEnabled",
+        "setEnabled",
+        "isPressed",
+        "setPressed",
+        "addChangeListener",
+        "removeChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8374,7 +8522,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEToggleModel": {
       "name": "ICEToggleModel",
@@ -8384,11 +8533,11 @@
       "summary": "",
       "props": [],
       "methods": [
-        "isSelected()",
-        "setSelected(selected: boolean)",
-        "toggle()",
-        "addChangeListener(listener: ICEToggleModelListener)",
-        "removeChangeListener(listener: ICEToggleModelListener)"
+        "isSelected",
+        "setSelected",
+        "toggle",
+        "addChangeListener",
+        "removeChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8397,7 +8546,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEBoundedRangeModel": {
       "name": "ICEBoundedRangeModel",
@@ -8407,12 +8557,12 @@
       "summary": "",
       "props": [],
       "methods": [
-        "getValue()",
-        "getMinimum()",
-        "getMaximum()",
-        "setValue(value: number)",
-        "addChangeListener(listener: ICEBoundedRangeModelListener)",
-        "removeChangeListener(listener: ICEBoundedRangeModelListener)"
+        "getValue",
+        "getMinimum",
+        "getMaximum",
+        "setValue",
+        "addChangeListener",
+        "removeChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8421,7 +8571,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESelectionModel": {
       "name": "ICESelectionModel",
@@ -8444,15 +8595,15 @@
         }
       ],
       "methods": [
-        "getMode()",
-        "setMode(mode: ICESelectionMode)",
-        "getSelectedKeys()",
-        "isSelected(key: string)",
-        "select(key: string)",
-        "toggle(key: string)",
-        "setSelected(keys: string[])",
-        "clear()",
-        "addChangeListener(listener: ICESelectionListener)"
+        "getMode",
+        "setMode",
+        "getSelectedKeys",
+        "isSelected",
+        "select",
+        "toggle",
+        "setSelected",
+        "clear",
+        "addChangeListener"
       ],
       "value": {
         "kind": "none",
@@ -8461,7 +8612,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEFormModel": {
       "name": "ICEFormModel",
@@ -8484,26 +8636,26 @@
         }
       ],
       "methods": [
-        "addField(options: ICEFormFieldOptions)",
-        "removeField(name: string)",
-        "getField(name: string)",
-        "getFieldNames()",
-        "getDependents(name: string)",
-        "getLabel(name: string)",
-        "getValue(name: string)",
-        "getValues()",
-        "setValue(name: string, value: any, options: { silent?: boolean })",
-        "setValues(values: Record<string, any>, options: { silent?: boolean })",
-        "getError(name: string)",
-        "getErrors()",
-        "hasErrors()",
-        "validateField(name: string, options: { silent?: boolean })",
-        "validate()",
-        "isValidating(name: string)",
-        "validateFieldAsync(name: string)",
-        "validateAsync()",
-        "reset()",
-        "addChangeListener(listener: ICEFormModelListener)"
+        "addField",
+        "removeField",
+        "getField",
+        "getFieldNames",
+        "getDependents",
+        "getLabel",
+        "getValue",
+        "getValues",
+        "setValue",
+        "setValues",
+        "getError",
+        "getErrors",
+        "hasErrors",
+        "validateField",
+        "validate",
+        "isValidating",
+        "validateFieldAsync",
+        "validateAsync",
+        "reset",
+        "addChangeListener"
       ],
       "value": {
         "kind": "none",
@@ -8512,7 +8664,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEBiosModel": {
       "name": "ICEBiosModel",
@@ -8522,28 +8675,28 @@
       "summary": "掌机 BIOS 的纯逻辑（不碰 canvas、不碰 DOM）。 掌机开机先跑一段「自检 → 菜单」的引导，然后才把控制权交给卡带： 自检**按时序推进**（页面每帧调 tick(dt)），菜单是**光标 + 确认**的老式控制台交互。 页面只负责把 getSteps() / getMenuEntries() 画成文字，并执行 confirm() 返回的动作 —— 状态机与渲染分开，所以「自检要跑多久、菜单怎么绕、设置存到哪」都能在 node 里单测。 约定：",
       "props": [],
       "methods": [
-        "getPhase()",
-        "getCartridges()",
-        "getPostElapsed()",
-        "getPostDuration()",
-        "getPostProgress()",
-        "getSteps()",
-        "getMenuEntries()",
-        "getCursor()",
-        "getSelectedEntry()",
-        "getSettings()",
-        "isQuickBoot()",
-        "getDefaultCartridge()",
-        "tick(delta: number)",
-        "moveCursor(delta: number)",
-        "setCursor(index: number)",
-        "confirm()",
-        "back()",
-        "openMenu()",
-        "restart()",
-        "toggleQuickBoot()",
-        "setDefaultCartridge(key: string)",
-        "addChangeListener(listener: ICEBiosListener)"
+        "getPhase",
+        "getCartridges",
+        "getPostElapsed",
+        "getPostDuration",
+        "getPostProgress",
+        "getSteps",
+        "getMenuEntries",
+        "getCursor",
+        "getSelectedEntry",
+        "getSettings",
+        "isQuickBoot",
+        "getDefaultCartridge",
+        "tick",
+        "moveCursor",
+        "setCursor",
+        "confirm",
+        "back",
+        "openMenu",
+        "restart",
+        "toggleQuickBoot",
+        "setDefaultCartridge",
+        "addChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8552,7 +8705,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_BIOS_DEFAULT_STEPS": {
       "name": "ICE_BIOS_DEFAULT_STEPS",
@@ -8569,7 +8723,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEHistoryModel": {
       "name": "ICEHistoryModel",
@@ -8579,16 +8734,16 @@
       "summary": "撤销 / 重做栈（纯逻辑，泛型）。 不是给某个画板专用的：任何「编辑 → 提交 → 后悔」的界面都能用（像素画板、看板、 表格编辑、表单草稿…），所以它只认泛型快照，不认识 canvas、颜色和数据结构。 约定：",
       "props": [],
       "methods": [
-        "getLimit()",
-        "getCurrent()",
-        "canUndo()",
-        "canRedo()",
-        "getDepth()",
-        "push(state: T)",
-        "undo()",
-        "redo()",
-        "clear(initial?: T)",
-        "addChangeListener(listener: ICEHistoryListener<T>)"
+        "getLimit",
+        "getCurrent",
+        "canUndo",
+        "canRedo",
+        "getDepth",
+        "push",
+        "undo",
+        "redo",
+        "clear",
+        "addChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8597,7 +8752,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETracePlayerModel": {
       "name": "ICETracePlayerModel",
@@ -8607,25 +8763,25 @@
       "summary": "「轨迹播放器」：把一串预先算好的帧按时间回放（纯逻辑，不碰 canvas）。 算法可视化（排序、寻路、正则匹配、Diff…）都是同一个套路：**先把整段过程算成一串帧， 再按时间回放**。播放 / 暂停 / 单步 / 调速 / 进度 / 到头停住这套逻辑跟具体算法无关， 所以单独抽出来 —— 算法只负责产帧（ICESortModel / ICEMazeModel），播放器只管「第几帧、要不要走」。 约定：",
       "props": [],
       "methods": [
-        "getFrameCount()",
-        "getIndex()",
-        "getFrame()",
-        "getFrames()",
-        "isPlaying()",
-        "getSpeed()",
-        "getProgress()",
-        "isFinished()",
-        "load(frames: T[])",
-        "play()",
-        "pause()",
-        "togglePlay()",
-        "stepForward()",
-        "stepBackward()",
-        "seek(index: number)",
-        "reset()",
-        "setSpeed(stepsPerSecond: number)",
-        "tick(delta: number)",
-        "addChangeListener(listener: ICETraceListener)"
+        "getFrameCount",
+        "getIndex",
+        "getFrame",
+        "getFrames",
+        "isPlaying",
+        "getSpeed",
+        "getProgress",
+        "isFinished",
+        "load",
+        "play",
+        "pause",
+        "togglePlay",
+        "stepForward",
+        "stepBackward",
+        "seek",
+        "reset",
+        "setSpeed",
+        "tick",
+        "addChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8634,7 +8790,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESortModel": {
       "name": "ICESortModel",
@@ -8644,14 +8801,14 @@
       "summary": "排序轨迹（纯逻辑，不碰 canvas）。 它只做一件事：**把排序算法跑一遍，把过程录成一串帧**。回放交给 ICETracePlayerModel， 画柱子交给页面（examples/algorithm-sandbox.html 里用一张 ICETileMap 画）。 一帧里带四样东西，正好对应可视化要画的四样：",
       "props": [],
       "methods": [
-        "getSize()",
-        "getMax()",
-        "getArray()",
-        "getAlgorithms()",
-        "setArray(values: number[])",
-        "randomize()",
-        "shuffle()",
-        "run(algorithm: string)"
+        "getSize",
+        "getMax",
+        "getArray",
+        "getAlgorithms",
+        "setArray",
+        "randomize",
+        "shuffle",
+        "run"
       ],
       "value": {
         "kind": "unknown",
@@ -8660,7 +8817,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_SORT_ALGORITHMS": {
       "name": "ICE_SORT_ALGORITHMS",
@@ -8677,7 +8835,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEMazeModel": {
       "name": "ICEMazeModel",
@@ -8687,21 +8846,21 @@
       "summary": "",
       "props": [],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getStart()",
-        "getGoal()",
-        "getAlgorithms()",
-        "getCells()",
-        "getCell(row: number, col: number)",
-        "isWall(row: number, col: number)",
-        "setWall(row: number, col: number, wall: boolean)",
-        "toggleWall(row: number, col: number)",
-        "clearWalls()",
-        "randomWalls(density: number)",
-        "setStart(row: number, col: number)",
-        "setGoal(row: number, col: number)",
-        "solve(algorithm: string)"
+        "getRows",
+        "getCols",
+        "getStart",
+        "getGoal",
+        "getAlgorithms",
+        "getCells",
+        "getCell",
+        "isWall",
+        "setWall",
+        "toggleWall",
+        "clearWalls",
+        "randomWalls",
+        "setStart",
+        "setGoal",
+        "solve"
       ],
       "value": {
         "kind": "unknown",
@@ -8710,7 +8869,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_MAZE_ALGORITHMS": {
       "name": "ICE_MAZE_ALGORITHMS",
@@ -8727,7 +8887,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_MAZE_CELL": {
       "name": "ICE_MAZE_CELL",
@@ -8744,7 +8905,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEDosModel": {
       "name": "ICEDosModel",
@@ -8754,14 +8916,14 @@
       "summary": "DOS 终端（虚拟文件系统 + 命令解释器，纯逻辑，不碰 DOM）。 页面只做三件事：把 run() 返回的行画成文字、把键盘输入交给模型、按 effect 做副作用 （cls 清屏 / exit 退出）。所以「命令怎么解析、路径怎么算、文件怎么改」全都能在 node 里断言。 约定：",
       "props": [],
       "methods": [
-        "getCwd()",
-        "getPrompt()",
-        "getBanner()",
-        "getHistory()",
-        "run(input: string)",
-        "historyPrev()",
-        "historyNext()",
-        "complete(input: string)"
+        "getCwd",
+        "getPrompt",
+        "getBanner",
+        "getHistory",
+        "run",
+        "historyPrev",
+        "historyNext",
+        "complete"
       ],
       "value": {
         "kind": "unknown",
@@ -8770,7 +8932,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEKeyScopeModel": {
       "name": "ICEKeyScopeModel",
@@ -8780,16 +8943,16 @@
       "summary": "键盘作用域（纯逻辑）：把「这个键归谁」变成声明式 + 可诊断。 为什么需要它：键盘冲突已经咬过两次 —— 掌机里「卡带要拿 R 当机器键」和「外壳用 R 重开」撞车； 终端里 Tab 既是补全又被焦点管理器当成轮转焦点，回车还会落到按钮上。这都不是打字错误， 而是**没人能回答「这个键归谁」**。 画布体系里这件事比 DOM 好办：组件树是我们自己的，键盘也从同一条总线出来 —— 于是可以做成一个**作用域栈 + 声明式键位**的模型：",
       "props": [],
       "methods": [
-        "push(scope: string)",
-        "pop(scope?: string)",
-        "getActiveScopes()",
-        "setEnabled(scope: string, enabled: boolean)",
-        "isEnabled(scope: string)",
-        "bind(binding: ICEKeyBinding)",
-        "dispatch(key: string, event?: any)",
-        "detectConflicts()",
-        "getDiagnostics()",
-        "addChangeListener(listener: ICEKeyScopeListener)"
+        "push",
+        "pop",
+        "getActiveScopes",
+        "setEnabled",
+        "isEnabled",
+        "bind",
+        "dispatch",
+        "detectConflicts",
+        "getDiagnostics",
+        "addChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8798,7 +8961,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEDateRangeModel": {
       "name": "ICEDateRangeModel",
@@ -8808,15 +8972,15 @@
       "summary": "区间日期模型（纯逻辑，不碰 canvas）。 区间选择的难点全在规则上，所以先把规则钉死，界面（日历面板 + 快捷项）只负责画：",
       "props": [],
       "methods": [
-        "getStart()",
-        "getEnd()",
-        "getValue()",
-        "isComplete()",
-        "getPresets()",
-        "setValue(start: Date | null, end: Date | null, options: { silent?: boolean })",
-        "applyPreset(key: string)",
-        "matchPreset()",
-        "addChangeListener(listener: ICEDateRangeListener)"
+        "getStart",
+        "getEnd",
+        "getValue",
+        "isComplete",
+        "getPresets",
+        "setValue",
+        "applyPreset",
+        "matchPreset",
+        "addChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8825,7 +8989,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_DATE_RANGE_PRESETS": {
       "name": "ICE_DATE_RANGE_PRESETS",
@@ -8842,7 +9007,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEMinesweeperModel": {
       "name": "ICEMinesweeperModel",
@@ -8852,27 +9018,27 @@
       "summary": "扫雷的纯逻辑模型（不碰 canvas）。 规则按 Windows XP 扫雷：",
       "props": [],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getMineCount()",
-        "getState()",
-        "isWon()",
-        "isLost()",
-        "isOver()",
-        "getElapsed()",
-        "getFlags()",
-        "getMinesLeft()",
-        "getRevealedCount()",
-        "getCells()",
-        "getCell(row: number, col: number)",
-        "areMinesPlaced()",
-        "neighbors(row: number, col: number)",
-        "reveal(row: number, col: number)",
-        "toggleFlag(row: number, col: number)",
-        "chord(row: number, col: number)",
-        "tick()",
-        "reset(options: ICEMinesweeperOptions)",
-        "addChangeListener(listener: ICEMinesweeperListener)"
+        "getRows",
+        "getCols",
+        "getMineCount",
+        "getState",
+        "isWon",
+        "isLost",
+        "isOver",
+        "getElapsed",
+        "getFlags",
+        "getMinesLeft",
+        "getRevealedCount",
+        "getCells",
+        "getCell",
+        "areMinesPlaced",
+        "neighbors",
+        "reveal",
+        "toggleFlag",
+        "chord",
+        "tick",
+        "reset",
+        "addChangeListener"
       ],
       "value": {
         "kind": "unknown",
@@ -8881,7 +9047,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_MINESWEEPER_DIFFICULTIES": {
       "name": "ICE_MINESWEEPER_DIFFICULTIES",
@@ -8898,7 +9065,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICETetrisModel": {
       "name": "ICETetrisModel",
@@ -8908,32 +9076,32 @@
       "summary": "七种方块。",
       "props": [],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getBoard()",
-        "getCurrent()",
-        "getNextQueue()",
-        "isGameOver()",
-        "isPaused()",
-        "getScore()",
-        "getLines()",
-        "getLastClearedLines()",
-        "getLevel()",
-        "getDropInterval()",
-        "getGhost()",
-        "addChangeListener(listener: ICETetrisListener)",
-        "moveLeft()",
-        "moveRight()",
-        "rotateCW()",
-        "rotateCCW()",
-        "tick()",
-        "softDrop()",
-        "hardDrop()",
-        "pause()",
-        "resume()",
-        "reset(options: ICETetrisOptions)",
-        "setCellForTest(row: number, col: number, type: ICETetrominoType | null)",
-        "setLinesForTest(lines: number)"
+        "getRows",
+        "getCols",
+        "getBoard",
+        "getCurrent",
+        "getNextQueue",
+        "isGameOver",
+        "isPaused",
+        "getScore",
+        "getLines",
+        "getLastClearedLines",
+        "getLevel",
+        "getDropInterval",
+        "getGhost",
+        "addChangeListener",
+        "moveLeft",
+        "moveRight",
+        "rotateCW",
+        "rotateCCW",
+        "tick",
+        "softDrop",
+        "hardDrop",
+        "pause",
+        "resume",
+        "reset",
+        "setCellForTest",
+        "setLinesForTest"
       ],
       "value": {
         "kind": "unknown",
@@ -8942,7 +9110,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_TETROMINOES": {
       "name": "ICE_TETROMINOES",
@@ -8959,7 +9128,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_TETRIS_LINE_SCORES": {
       "name": "ICE_TETRIS_LINE_SCORES",
@@ -8976,7 +9146,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICESnakeModel": {
       "name": "ICESnakeModel",
@@ -8986,28 +9157,28 @@
       "summary": "四个方向。",
       "props": [],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getBody()",
-        "getHead()",
-        "getLength()",
-        "getFood()",
-        "getDirection()",
-        "getPendingDirections()",
-        "getScore()",
-        "getEaten()",
-        "getLevel()",
-        "getTickInterval()",
-        "isGameOver()",
-        "isPaused()",
-        "addChangeListener(listener: ICESnakeListener)",
-        "setDirection(direction: ICESnakeDirection)",
-        "tick()",
-        "pause()",
-        "resume()",
-        "reset(options: ICESnakeOptions)",
-        "setBodyForTest(cells: ICESnakePoint[], direction?: ICESnakeDirection)",
-        "setFoodForTest(row: number, col: number)"
+        "getRows",
+        "getCols",
+        "getBody",
+        "getHead",
+        "getLength",
+        "getFood",
+        "getDirection",
+        "getPendingDirections",
+        "getScore",
+        "getEaten",
+        "getLevel",
+        "getTickInterval",
+        "isGameOver",
+        "isPaused",
+        "addChangeListener",
+        "setDirection",
+        "tick",
+        "pause",
+        "resume",
+        "reset",
+        "setBodyForTest",
+        "setFoodForTest"
       ],
       "value": {
         "kind": "unknown",
@@ -9016,7 +9187,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_SNAKE_DIRECTIONS": {
       "name": "ICE_SNAKE_DIRECTIONS",
@@ -9033,7 +9205,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEHighScoreModel": {
       "name": "ICEHighScoreModel",
@@ -9043,15 +9216,15 @@
       "summary": "排行榜的纯逻辑模型（不碰 canvas，也不直接依赖 localStorage）。",
       "props": [],
       "methods": [
-        "getKey()",
-        "getStorageKey()",
-        "getMaxEntries()",
-        "getScores()",
-        "getBest()",
-        "isInTop(score: number)",
-        "add(score: number, options: { label?: string; at?: number })",
-        "clear()",
-        "reload()"
+        "getKey",
+        "getStorageKey",
+        "getMaxEntries",
+        "getScores",
+        "getBest",
+        "isInTop",
+        "add",
+        "clear",
+        "reload"
       ],
       "value": {
         "kind": "unknown",
@@ -9060,7 +9233,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEChip8Model": {
       "name": "ICEChip8Model",
@@ -9070,30 +9244,30 @@
       "summary": "状态变化通知（掌机外壳拿它驱动重绘，和另外三个游戏模型是同一套契约）。",
       "props": [],
       "methods": [
-        "getPC()",
-        "getI()",
-        "getV(index: number)",
-        "getDisplay()",
-        "getPixel(row: number, col: number)",
-        "getDelayTimer()",
-        "getSoundTimer()",
-        "getCycles()",
-        "isWaitingForKey()",
-        "memoryRead(address: number)",
-        "isKeyDown(index: number)",
-        "isPaused()",
-        "isGameOver()",
-        "pause()",
-        "resume()",
-        "addChangeListener(listener: ICEChip8Listener)",
-        "loadProgram(bytes: ArrayLike<number>, address: number)",
-        "memoryWrite(address: number, value: number)",
-        "setKey(index: number, down: boolean)",
-        "clearKeys()",
-        "setVForTest(index: number, value: number)",
-        "reset()",
-        "tickTimers()",
-        "step()"
+        "getPC",
+        "getI",
+        "getV",
+        "getDisplay",
+        "getPixel",
+        "getDelayTimer",
+        "getSoundTimer",
+        "getCycles",
+        "isWaitingForKey",
+        "memoryRead",
+        "isKeyDown",
+        "isPaused",
+        "isGameOver",
+        "pause",
+        "resume",
+        "addChangeListener",
+        "loadProgram",
+        "memoryWrite",
+        "setKey",
+        "clearKeys",
+        "setVForTest",
+        "reset",
+        "tickTimers",
+        "step"
       ],
       "value": {
         "kind": "unknown",
@@ -9102,7 +9276,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_CHIP8_KEYS": {
       "name": "ICE_CHIP8_KEYS",
@@ -9119,7 +9294,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE2048Model": {
       "name": "ICE2048Model",
@@ -9129,25 +9305,25 @@
       "summary": "四个方向。",
       "props": [],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getCells()",
-        "getCell(row: number, col: number)",
-        "getScore()",
-        "getMoves()",
-        "getTarget()",
-        "getBestTile()",
-        "isWon()",
-        "isGameOver()",
-        "isPaused()",
-        "getLastMerged()",
-        "pause()",
-        "resume()",
-        "canMove()",
-        "addChangeListener(listener: ICE2048Listener)",
-        "move(direction: ICE2048Direction)",
-        "reset(options: ICE2048Options)",
-        "setCellsForTest(cells: ICE2048Cell[])"
+        "getRows",
+        "getCols",
+        "getCells",
+        "getCell",
+        "getScore",
+        "getMoves",
+        "getTarget",
+        "getBestTile",
+        "isWon",
+        "isGameOver",
+        "isPaused",
+        "getLastMerged",
+        "pause",
+        "resume",
+        "canMove",
+        "addChangeListener",
+        "move",
+        "reset",
+        "setCellsForTest"
       ],
       "value": {
         "kind": "unknown",
@@ -9156,7 +9332,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_2048_DIRECTIONS": {
       "name": "ICE_2048_DIRECTIONS",
@@ -9173,7 +9350,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEPixelModel": {
       "name": "ICEPixelModel",
@@ -9214,31 +9392,31 @@
         }
       ],
       "methods": [
-        "getRows()",
-        "getCols()",
-        "getPalette()",
-        "getBackground()",
-        "getCells()",
-        "getPixel(row: number, col: number)",
-        "isDirty()",
-        "canUndo()",
-        "canRedo()",
-        "getHistoryDepth()",
-        "setPixel(row: number, col: number, color: number)",
-        "drawLine(row0: number, col0: number, row1: number, col1: number, color: number)",
-        "getLineCells(row0: number, col0: number, row1: number, col1: number)",
-        "getRectCells(row0: number, col0: number, row1: number, col1: number)",
-        "drawRect(row0: number, col0: number, row1: number, col1: number, color: number)",
-        "fill(row: number, col: number, color: number)",
-        "clear(color?: number)",
-        "resize(rows: number, cols: number)",
-        "commit()",
-        "undo()",
-        "redo()",
-        "toSVG(options: ICEPixelSVGOptions)",
-        "toRGBA(scale: number)",
-        "toJSON()",
-        "addChangeListener(listener: ICEPixelListener)"
+        "getRows",
+        "getCols",
+        "getPalette",
+        "getBackground",
+        "getCells",
+        "getPixel",
+        "isDirty",
+        "canUndo",
+        "canRedo",
+        "getHistoryDepth",
+        "setPixel",
+        "drawLine",
+        "getLineCells",
+        "getRectCells",
+        "drawRect",
+        "fill",
+        "clear",
+        "resize",
+        "commit",
+        "undo",
+        "redo",
+        "toSVG",
+        "toRGBA",
+        "toJSON",
+        "addChangeListener"
       ],
       "value": {
         "kind": "none",
@@ -9247,7 +9425,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "ICE_PIXEL_DEFAULT_PALETTE": {
       "name": "ICE_PIXEL_DEFAULT_PALETTE",
@@ -9264,7 +9443,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是常量便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "icePixelParseColor": {
       "name": "icePixelParseColor",
@@ -9281,7 +9461,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     },
     "ICEGeometryAudit": {
       "name": "ICEGeometryAudit",
@@ -9310,10 +9491,10 @@
         }
       ],
       "methods": [
-        "run(root: ICEGeometryNode)",
-        "count(root: ICEGeometryNode)",
-        "box(node: ICEGeometryNode)",
-        "label(node: ICEGeometryNode)"
+        "run",
+        "count",
+        "box",
+        "label"
       ],
       "value": {
         "kind": "none",
@@ -9322,7 +9503,8 @@
       "role": {
         "kind": "not-field",
         "reason": "不在录入组里，不是字段。"
-      }
+      },
+      "initKey": "value"
     },
     "bindICEKeyScope": {
       "name": "bindICEKeyScope",
@@ -9339,7 +9521,8 @@
       "role": {
         "kind": "not-component",
         "reason": "不是组件类，是函数便捷入口。"
-      }
+      },
+      "initKey": "value"
     }
   }
 }

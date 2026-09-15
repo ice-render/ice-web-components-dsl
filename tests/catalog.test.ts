@@ -32,6 +32,8 @@ interface CatalogEntry {
   methods: string[];
   value: { kind: string; type: string | null };
   role: { kind: string; fieldType?: string; plannedType?: string; reason?: string };
+  /** 初始值走哪个构造键（缺省 `value`；`ICETransfer` 是 `targetKeys`）。 */
+  initKey: string;
   note?: string;
 }
 
@@ -61,6 +63,16 @@ describe('清单与上游同步', () => {
   it('清单记住了上游的版本（否则不知道是哪一版抽出来的）', () => {
     expect(catalog.from.package).toBe('ice-web-components');
     expect(catalog.from.version).toMatch(/^\d+\.\d+\.\d+/);
+  });
+
+  it('清单读的那份上游 == 测试跑的那份上游（否则清单描述的不是被测物）', () => {
+    // 生成器读**兄弟仓** `../ice-web-components`，而 jest 经 node_modules 解析到
+    // **安装的那一份**。两者都是真实目录、不是软链 —— 版本一旦错开，清单就在描述
+    // 一个测试从没跑过的东西，而且不会有任何症状。
+    const installed = JSON.parse(
+      fs.readFileSync(path.join(ROOT, 'node_modules/ice-web-components/package.json'), 'utf8')
+    );
+    expect(catalog.from.version).toBe(installed.version);
   });
 
   it('分组与上游 GROUPS 一致，且每组都有条目', () => {
@@ -139,6 +151,17 @@ describe('解析出来的条目是完整的', () => {
     expect(select.props.find((p) => p.name === 'value')!.type).toBe('string | string[]');
   });
 
+  it('方法名是**裸名**，不带调用语法', () => {
+    // 第一版没切参数表，`methods` 里存的是 `setValue(hex: string)` ——
+    // 于是 `methods.includes('getFormValue')` 永远为假，我把 ICETransfer / ICERadioButton
+    // 判成了"没有表单取值约定"，结论正好反了。方法名必须是裸名。
+    const color = catalog.components.ICEColorPicker;
+    expect(color.methods).toContain('getValue');
+    expect(color.methods).toContain('getFormValue');
+    const withParens = entries.filter((e) => e.methods.some((m) => m.includes('(')));
+    expect(withParens.map((e) => e.name)).toEqual([]);
+  });
+
   it('`gaps.propsMissing` 与"props 为空的类"完全一致（这一节不能烂掉）', () => {
     const actually = entries
       .filter((e) => e.kind === 'class' && e.props.length === 0)
@@ -195,6 +218,48 @@ describe('DSL 侧标注是自洽的', () => {
   });
 });
 
+describe('SKILL 里给 agent 看的那几张表与实现同步', () => {
+  /**
+   * §2.1 那张表是**手写**的（它是本包对 agent 的契约，措辞要讲究），
+   * 所以它会漂移 —— 加了类型忘了补表，agent 就看不到新类型。
+   * 这里把"表里列的类型集合"与 `FORM_DSL_FIELD_TYPES` 对起来。
+   */
+  const skill = fs.readFileSync(path.join(ROOT, 'skills/ice-web-components-dsl/SKILL.md'), 'utf8');
+
+  function section21Rows(): string[] {
+    const start = skill.indexOf('### 2.1 字段类型');
+    expect(start).toBeGreaterThanOrEqual(0);
+    const end = skill.indexOf('\n\n', skill.indexOf('| `date-range`', start));
+    const body = skill.slice(start, end < 0 ? undefined : end);
+    const types: string[] = [];
+    for (const line of body.split('\n')) {
+      const m = line.match(/^\|\s*`([a-z-]+)`\s*\|/);
+      // 表头那一行是 `| \`type\` | 对应控件 | …` —— 它的第一格恰好也匹配（`type` 是 `[a-z-]+`），
+      // 所以要把表头自己排掉，否则会多出一个 "type"
+      if (m && m[1] !== 'type') types.push(m[1]);
+    }
+    return types;
+  }
+
+  it('§2.1 列出的类型 == 已实现的类型（不多不少）', () => {
+    expect(section21Rows().sort()).toEqual([...FORM_DSL_FIELD_TYPES].sort());
+  });
+
+  it('§7.1 的"每个 type 背后是哪个组件"也覆盖全部类型', () => {
+    // §7.1 是**生成**的，理论上不会漏；但生成器遍历的是清单里的 field 标注，
+    // 而标注可能漏（漏了生成器会抛）。这条是对着 agent 真正读到的那份文件验的。
+    const start = skill.indexOf('### 7.1');
+    const end = skill.indexOf('### 7.', start + 5);
+    const body = skill.slice(start, end);
+    const types: string[] = [];
+    for (const line of body.split('\n')) {
+      const m = line.match(/^\|\s*`([a-z-]+)`\s*\|\s*`ICE/);
+      if (m) types.push(m[1]);
+    }
+    expect(types.sort()).toEqual([...FORM_DSL_FIELD_TYPES].sort());
+  });
+});
+
 describe('值的形状（`required` / `minLength` 落在什么上面）', () => {
   const shape = (name: string) => catalog.components[name].value.kind;
 
@@ -230,12 +295,21 @@ describe('值的形状（`required` / `minLength` 落在什么上面）', () => 
     }
   });
 
-  it('已接入的类型里，值形状必须是推出来的那几种之一（不含 none）', () => {
-    // `none`（声明了参数但没有 value 这个键）对已接入的类型是不成立的 ——
-    // 真出现说明上游把某个控件的取值入口改了名，得人来看。
-    const noneEntries = entries
-      .filter((e) => e.role.kind === 'field' && e.value.kind === 'none')
+  it('"没有 value 参数"的字段必须说清初始化走哪个键（否则会被读成"不能当字段"）', () => {
+    // 第一版这条写的是"已接入的类型里值形状不能是 none"—— 前提就错了：
+    // `value.kind === 'none'` 只表示**组件没有 `value` 构造参数**，
+    // 不表示不能当字段。`ICETransfer` 就没有 `value`，它的初始化键是 `targetKeys`。
+    //
+    // 真正要守的是：**偏离缺省就要说出来**。没说 = 别人只能看到"没有 value"，
+    // 会得出"这个组件不能当字段"的结论（我正是这么判错的）。
+    const unexplained = entries
+      .filter((e) => e.role.kind === 'field' && e.value.kind === 'none' && (!e.initKey || e.initKey === 'value'))
       .map((e) => e.name);
-    expect(noneEntries).toEqual([]);
+    expect(unexplained).toEqual([]);
+  });
+
+  it('`initKey` 缺省是 `value`，偏离的必须真实存在', () => {
+    expect(catalog.components.ICETextField.initKey).toBe('value');
+    expect(catalog.components.ICETransfer.initKey).toBe('targetKeys');
   });
 });

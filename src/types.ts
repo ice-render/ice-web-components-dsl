@@ -38,8 +38,18 @@ export const FORM_DSL_SCHEMA_VERSION = 1;
 export const FORM_DSL_KINDS = ['form'] as const;
 export type FormDslKind = (typeof FORM_DSL_KINDS)[number];
 
-/** 字段类型。每个对应 `ice-web-components` 的一个录入控件。 */
+/**
+ * 字段类型。每个对应 `ice-web-components` 的一个录入控件。
+ *
+ * 加新类型的**硬条件**是"值能经 JSON 往返"—— 也就是 `setFormValue(v)` 之后
+ * `getFormValue()` 得能给出同一个东西。这条不是纸上标准：
+ * `ICEUpload` 的 `setFormValue` 是基类默认的照收不误、组件本身不参与取值，
+ * `ICERadioButton` 的 `getFormValue()` 返回的是**布尔**（只表示自己勾没勾，
+ * 互斥要调用方维护），两个都不满足，所以都**不在**这张表里。
+ * 证据在 `tests/field-values.test.ts`。
+ */
 export const FORM_DSL_FIELD_TYPES = [
+  // ---- 第一批：纯输入 ----
   'text',
   'textarea',
   'password',
@@ -51,14 +61,37 @@ export const FORM_DSL_FIELD_TYPES = [
   'checkbox-group',
   'select',
   'date',
+  // ---- 第二批 ----
+  'color',
+  'rate',
+  'time',
+  'segmented',
+  'autocomplete',
+  'cascader',
+  'tree-select',
+  'transfer',
+  'date-range',
 ] as const;
 export type FormDslFieldType = (typeof FORM_DSL_FIELD_TYPES)[number];
 
 /** 选项型字段：必须提供 `options`。 */
-export const OPTION_FIELD_TYPES: FormDslFieldType[] = ['radio-group', 'checkbox-group', 'select'];
+export const OPTION_FIELD_TYPES: FormDslFieldType[] = [
+  'radio-group',
+  'checkbox-group',
+  'select',
+  'color',
+  'segmented',
+  'autocomplete',
+  'cascader',
+  'tree-select',
+  'transfer',
+];
+
+/** `options` 允许嵌套 `children` 的类型（级联 / 树）。 */
+export const TREE_OPTION_FIELD_TYPES: FormDslFieldType[] = ['cascader', 'tree-select'];
 
 /** 数值型字段：`min` / `max` 会**同时**约束控件与生成校验规则。 */
-export const NUMERIC_FIELD_TYPES: FormDslFieldType[] = ['number', 'slider'];
+export const NUMERIC_FIELD_TYPES: FormDslFieldType[] = ['number', 'slider', 'rate'];
 
 /** 文本型字段：`maxLength` 会**同时**限制输入长度与生成校验规则。 */
 export const TEXT_FIELD_TYPES: FormDslFieldType[] = ['text', 'textarea', 'password'];
@@ -66,14 +99,35 @@ export const TEXT_FIELD_TYPES: FormDslFieldType[] = ['text', 'textarea', 'passwo
 /** 取值为布尔（真/假）的字段类型。 */
 export const BOOLEAN_FIELD_TYPES: FormDslFieldType[] = ['checkbox', 'switch'];
 
-/** 取值为字符串数组的字段类型。 */
-export const ARRAY_FIELD_TYPES: FormDslFieldType[] = ['checkbox-group'];
+/**
+ * 值形状：**它是「类型 + 属性」的函数，不是「类型」的函数**。
+ *
+ * 之前这里是个 `ARRAY_FIELD_TYPES = ['checkbox-group']` 的常量 —— 那是死代码，
+ * 而且口径装不下事实：`select` / `tree-select` 的值是标量还是数组**取决于 `mode`**，
+ * `date-range` 是元组。按类型列表建模永远差这一块。
+ *
+ * 现在它有了真实用处：**校验 `default` 的形状**（`date-range` 的 `default` 必须是
+ * 两头齐全的数组，`transfer` / 多选的 `select` 必须是数组）。这是 agent 最容易写错的
+ * 地方之一，而报错时能说清"你这个类型期望什么形状"正是本包的价值。
+ */
+export type FormDslValueShape = 'scalar' | 'array' | 'tuple';
 
-/** 一个选项。`value` 是取值，`label` 只是显示 —— 跟 `ICESelect` 的选项同形。 */
+export function fieldValueShape(field: Pick<FormDslField, 'type' | 'mode'>): FormDslValueShape {
+  if (field.type === 'date-range') return 'tuple';
+  if (field.type === 'transfer') return 'array';
+  if (field.type === 'checkbox-group') return 'array';
+  // 值形状随 `mode` 变的那两个：只有多选才是数组
+  if ((field.type === 'select' || field.type === 'tree-select') && field.mode === 'multiple') return 'array';
+  return 'scalar';
+}
+
+/** 一个选项。`value` 是取值，`label` 只是显示。 */
 export interface FormDslOption {
   value: string;
   label?: string;
   disabled?: boolean;
+  /** 级联 / 树：下层选项（仅 `cascader` / `tree-select` 用）。 */
+  children?: FormDslOption[];
 }
 
 /**
@@ -122,18 +176,37 @@ export interface FormDslField {
   dependencies?: string[];
 
   // ---- 选项型字段 ----
-  options?: FormDslOption[];
+  /**
+   * 候选项。
+   *
+   * **两种写法都收**：`[{ "value": "a", "label": "甲" }]` 或直接 `["a", "b"]`。
+   * 后者归一化成 `{ value: s, label: s }`。
+   *
+   * 之所以要收裸字符串：库里不同的组件要的形状不一样 —— `ICEColorPicker` 要
+   * `colors: string[]`、`ICEAutoComplete` 要 `options: string[]`、
+   * `ICESelect` 要 `options: {value,label}[]`。**agent 不该知道这些差别**，
+   * 那是本包该归一化掉的事（跟 `ICESelectOption.label` 必填一样）。
+   *
+   * `cascader` / `tree-select` 可以在项上写 `children` 往下嵌。
+   */
+  options?: FormDslOption[] | string[];
 
-  // ---- 各类型自己的属性（白名单见 validate.ts 的 FIELD_PROP_WHITELIST）----
-  /** `number` / `slider`：步进 */
+  // ---- 各类型自己的属性（白名单见 validate.ts 的 TYPE_FIELD_KEYS）----
+  /** `number` / `slider` / `rate`：步进。`rate` 用不到。 */
   step?: number;
   /** `number`：小数位 */
   precision?: number;
   /** `slider`：区间双滑块 */
   range?: boolean;
-  /** `select`：`single` / `multiple` / `tags` */
-  mode?: 'single' | 'multiple' | 'tags';
-  /** `select`：可搜索。 */
+  /**
+   * `select` / `tree-select`：选择模式。
+   *
+   * 类型写 `string` 而不是联合 —— 合法取值**按字段类型不同**（`tree-select` 没有 `tags`），
+   * 交给 `validate.ts` 的白名单去管：对 agent 来说"诊断里列出这个类型可用哪些取值"
+   * 比 TS 报一句"tags 不能赋给 tree-select"有用得多。跟 `placement` 同一个口径。
+   */
+  mode?: string;
+  /** `select` / `tree-select`：可搜索。 */
   showSearch?: boolean;
   /**
    * `date`：浮层位置。
@@ -150,6 +223,16 @@ export interface FormDslField {
   /** `text` / `textarea`：可清除、显示字数 */
   allowClear?: boolean;
   showCount?: boolean;
+
+  /**
+   * `time`：值格式。`ICETimePickerOptions.format` 恰好是个**字符串**联合
+   * （不是函数），所以这个能进 DSL —— 跟 `date` 正好相反。
+   */
+  format?: 'HH:mm:ss' | 'HH:mm';
+  /** `cascader`：已选路径的显示分隔符。 */
+  separator?: string;
+  /** `segmented`：各段等宽铺满整条（默认 true）。 */
+  block?: boolean;
 
   /** 控件宽度（CSS 像素）。不给则由表单布局决定。 */
   width?: number;

@@ -42,15 +42,19 @@ const CHECK = process.argv.includes('--check');
 /**
  * `数据录入` / `数据录入（浮层类）` 这两组里的组件，逐个说明它在 DSL 里的位置。
  *
- * - `fieldType` —— 已经能用（`FORM_DSL_FIELD_TYPES` 里有）。
- * - `planned` —— 可以作字段，但 DSL 还没接。值形状见 `note`。
+ * - `fieldType` —— 已经是 DSL 的一个字段类型。
+ * - `planned` —— 可以作字段，但 DSL 还没接。
  * - `notField` —— **不是**字段，附理由。
  *
  * 其余分组（数据展示 / 反馈与状态 / 导航 / 核心与布局）一律不是字段 ——
  * 那是分组的定义决定的，不需要逐条标注。
+ *
+ * **判据是运行时的**：能不能当字段取决于"值能不能经 JSON 往返"，
+ * 那不是从文档能看出来的（我在这上面连错两次，见 `tests/field-values.test.ts` 的注释）。
+ * 每个 `notField` 的理由都对应那条测试里的一个断言。
  */
 const INPUT_ANNOTATIONS = {
-  // ---- 已接入（11 个类型对应 12 个组件）----
+  // ---- 第一批（11 个类型 / 12 个组件）----
   ICETextField: { fieldType: 'text' },
   ICETextArea: { fieldType: 'textarea' },
   ICEPasswordField: { fieldType: 'password' },
@@ -62,28 +66,63 @@ const INPUT_ANNOTATIONS = {
   ICECheckboxGroup: { fieldType: 'checkbox-group' },
   ICESelect: {
     fieldType: 'select',
-    note: '值形状**取决于 `mode`**：single/tags → string，multiple → string[]。DSL 没有把这条建模进去（见 types.ts 的 ARRAY_FIELD_TYPES）。',
+    note: '值形状**取决于 `mode`**：single/tags → string，multiple → string[]。由 `fieldValueShape()` 按「类型 + 属性」算出来。',
   },
   ICEDatePicker: { fieldType: 'date' },
 
-  // ---- 可以作字段、还没接 ----
-  ICEAutoComplete: { planned: 'autocomplete', note: '值是 string，但 `options` 是 `string[]` 而不是 `{value,label}[]`，与现有选项模型不同形。' },
-  ICECascader: { planned: 'cascader', note: '值是**最深一层的 string**，但 `options` 是树；`getPath()` 才能回显上级 —— 往返语义不唯一，要设计。' },
-  ICEColorPicker: { planned: 'color', note: '值是 string（hex），形状干净。' },
-  ICEDateRangePicker: {
-    planned: 'date-range',
-    note: '值是**元组** `[string|null, string|null]`，且允许"只选了一头"的进行中状态 —— `required` 该表示"两头都在"还是"至少一头"是一个**语义决策**，不是实现问题。',
+  // ---- 第二批（9 个类型，0.3.0）----
+  ICEColorPicker: {
+    fieldType: 'color',
+    note: '组件的键名是 `colors: string[]`（不是 `options`），且 `setFormValue` 会把任何输入强制成 string —— 归一化与形状都由编译期兜住。',
   },
-  ICETimePicker: { planned: 'time', note: '值是 string（HH:mm[:ss]）。' },
-  ICERate: { planned: 'rate', note: '值是 number。' },
-  ICESegmented: { planned: 'segmented', note: '值是 string，需要 `options`。' },
-  ICERadioButton: { planned: 'radio-button', note: '注意：单个按钮**不管互斥**（互斥由 ICERadioGroup 维护），直接当字段会做出"两个都能选上"的假单选。' },
-  ICETreeSelect: { planned: 'tree-select', note: '值形状同样取决于 `mode`；且 `nodes` 是树而不是 `options`。' },
-  ICETransfer: { planned: 'transfer', note: '**没有 `value`**，只有 `targetKeys: string[]` —— 要先把"值"定义出来才谈得上校验。' },
-  ICEUpload: { planned: 'upload', note: '**没有 `value`**，是文件选择器 —— 值该是文件列表，`required` 的含义要重新定义。' },
+  ICERate: {
+    fieldType: 'rate',
+    note: '值是 number，且**没有 `width`**（一排固定大小的星星）—— 唯一一个不能传宽度的类型。`max` 在 DSL 里是"满分几颗星"，映射到组件的 `count` 并同时进规则。',
+  },
+  ICETimePicker: {
+    fieldType: 'time',
+    note: '值是 string。`format` 恰好是**字符串**联合（`HH:mm:ss` / `HH:mm`），所以能进 DSL —— 而 `date` 的 `format` 是函数，进不来。',
+  },
+  ICESegmented: { fieldType: 'segmented', note: '值是 string，`options` 与现有形状同形。' },
+  ICEAutoComplete: {
+    fieldType: 'autocomplete',
+    note: '候选是**裸字符串数组**（`options: string[]`）—— DSL 收 `["a","b"]` 这种写法，编译期归一化。初始值是 `""` 而不是 undefined。',
+  },
+  ICECascader: {
+    fieldType: 'cascader',
+    note: '值是最深一层的 string。选项是**树**，但形状就是现有选项加一个 `children`。注意**只有叶子可选**（诊断里的"可用取值"只列叶子）。',
+  },
+  ICETreeSelect: {
+    fieldType: 'tree-select',
+    note: '值形状取决于 `mode`（single → string / multiple → string[]）。节点的键名是 `key` 不是 `value`，编译期映射。**任何节点都能选**（与 cascader 不同）。',
+  },
+  ICETransfer: {
+    fieldType: 'transfer',
+    // 没有 `value` 构造参数，初始化的键是 `targetKeys` —— **要显式说出来**，
+    // 否则清单只能说"这个组件没有 value"，读的人会以为它不能当字段
+    // （我就在这上面判错过一次）。门禁会要求：`value.kind === 'none'` 的字段
+    // 必须声明 `initKey`。
+    initKey: 'targetKeys',
+    note: '值是 `string[]`。候选池的键名是 `dataSource`（`{key,label}[]`）、值的键名是 `targetKeys` —— 两个键名都在编译期消化掉，DSL 侧只写 `options` + `default`。',
+  },
+  ICEDateRangePicker: {
+    fieldType: 'date-range',
+    note: '值是**元组** `[起, 止]`。`required` 的语义在这里定案：**两头都在才算填完** —— 只选一头是"进行中"，而 `setFormValue` 对不完整区间会回落成 `[null, null]`（运行时证据），所以"只选一头"等价于没填。',
+  },
 
-  // ---- 在"数据录入"组里，但不是字段 ----
-  ICEFormList: { notField: '重复行组（`initialRows` + `renderRow`）—— 它是"一个字段"的**复数形式**，形状是数组套字段，不是字段表能表达的。要做得新开一个 kind。' },
+  // ---- 在"数据录入"组里，但**不是**字段 ----
+  ICERadioButton: {
+    notField:
+      '`getFormValue()` 返回的是**布尔**（只表示自己勾没勾），而**互斥要调用方维护** —— 当字段用会做出"两个都能选上"的假单选，而 `radio-group` / `checkbox` 已经覆盖这个需求且更好。证据：`tests/field-values.test.ts`。',
+  },
+  ICEUpload: {
+    notField:
+      '`setFormValue` 是基类默认的**照收不误**（给什么存什么），组件本身不参与取值 —— 说明它没实现这条约定。而且上传的值是**文件列表**，那东西没法经 JSON 往返给 agent，不是一个"字段值"。要做得多先定义"值是什么"。证据：`tests/field-values.test.ts`。',
+  },
+  ICEFormList: {
+    notField:
+      '重复行组（`initialRows` + `renderRow`）—— 它是"一个字段"的**复数形式**，形状是数组套字段，不是字段表能表达的。要做得新开一个 kind。',
+  },
   ICEForm: { notField: '表单容器本身（DSL 的产物），不是字段。' },
   ICEFormItem: { notField: '表单项容器（DSL 的产物），不是字段。' },
 };
@@ -275,12 +314,12 @@ function parseGroupDoc(markdown) {
         continue;
       }
       const [nameCell, typeCell, docCell] = row;
-      // `optional` 必须从**去掉反引号之后**的名字判 —— 原始单元格是 `` `value?` ``，
-      // 末尾是反引号不是问号（第一版就是这么把所有字段都标成必填的）
-      const propName = plain(nameCell).replace(/\?$/, '');
-      const optional = plain(nameCell).endsWith('?');
-      if (!propName) continue;
       if (table === props) {
+        // `optional` 必须从**去掉反引号之后**的名字判 —— 原始单元格是 `` `value?` ``，
+        // 末尾是反引号不是问号（第一版就是这么把所有字段都标成必填的）
+        const propName = plain(nameCell).replace(/\?$/, '');
+        const optional = plain(nameCell).endsWith('?');
+        if (!propName) continue;
         props.push({
           name: propName,
           type: plain(typeCell || ''),
@@ -288,7 +327,13 @@ function parseGroupDoc(markdown) {
           doc: plain(docCell || ''),
         });
       } else {
-        methods.push(propName);
+        // 方法取**裸名**：单元格是 `` `setValue(value: string)` ``，
+        // 不切参数表的话 `methods` 里会存成 `setValue(value: string)` ——
+        // 于是 `methods.includes('getFormValue')` 永远为假（第一版就是这么把
+        // ICETransfer / ICERadioButton 判成"没有表单取值约定"的，结论正好反了）。
+        const methodName = plain(nameCell).replace(/\(.*$/, '');
+        if (!methodName) continue;
+        methods.push(methodName);
       }
     }
 
@@ -363,18 +408,20 @@ function renderSkillSection(cat) {
   }
   lines.push('');
 
-  lines.push('### 7.2 能当字段、但 DSL 还没接的');
-  lines.push('');
-  lines.push('| 组件 | 建议的 `type` | 说明 |');
-  lines.push('|---|---|---|');
-  for (const c of planned) {
-    lines.push(`| \`${c.name}\` | \`${c.role.plannedType}\` | ${c.note} |`);
+  if (planned.length) {
+    lines.push('### 7.2 能当字段、但 DSL 还没接的');
+    lines.push('');
+    lines.push('| 组件 | 建议的 `type` | 说明 |');
+    lines.push('|---|---|---|');
+    for (const c of planned) {
+      lines.push(`| \`${c.name}\` | \`${c.role.plannedType}\` | ${c.note} |`);
+    }
+    lines.push('');
+    lines.push(
+      '**这些都别写进 DSL** —— 会被 `unsupported-field-type` 拦下。那是设计如此（宁可拦下也不要静默不生效），不是漏了。'
+    );
+    lines.push('');
   }
-  lines.push('');
-  lines.push(
-    '**这些都别写进 DSL** —— 会被 `unsupported-field-type` 拦下。那是设计如此（宁可拦下也不要静默不生效），不是漏了。'
-  );
-  lines.push('');
 
   lines.push('### 7.3 不是字段的（别往字段表里塞）');
   lines.push('');
@@ -500,6 +547,7 @@ function build() {
         role = { kind: 'not-field', reason: NON_FIELD_GROUPS[group.file] || '不在录入组里，不是字段。' };
       }
 
+
       components[name] = {
         name,
         kind: info.kind,
@@ -510,6 +558,12 @@ function build() {
         methods: info.methods,
         value: shape,
         role,
+        /**
+         * 初始值走哪个构造键。缺省是 `value`；`ICETransfer` 是 `targetKeys`。
+         * 只有需要偏离缺省时才写 —— 但**必须写**，因为"没有 `value` 参数"与
+         * "不能当字段"是两件事，清单不能让人把前者读成后者。
+         */
+        initKey: annotation?.initKey ?? 'value',
         ...(annotation?.note ? { note: annotation.note } : {}),
       };
     }

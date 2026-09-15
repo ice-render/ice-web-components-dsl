@@ -37,16 +37,23 @@
 1. **只写声明，不写坐标。** 没有 `left` / `top`，也没有控件实例。
 2. **`kind` 只能是 `"form"`**。
 3. **`fields` 非空**，每个字段有 `name` 与 `type`，`name` 不重复。
-4. **`type` 只能是这 11 个**：`text` `textarea` `password` `number` `slider` `checkbox`
-   `switch` `radio-group` `checkbox-group` `select` `date`。
-   `ice-web-components` 里还有别的录入控件（日期区间、时间、评分、穿梭框…），但**还没接进本 DSL**，
-   写了会被拦下 —— 哪些能接、哪些不是字段，见 SKILL §7。
-5. **选项型字段（`select` / `radio-group` / `checkbox-group`）必须给 `options`**，
-   每项 `{ "value": "...", "label": "..." }`，`label` 可省。
+4. **`type` 只能是这 20 个**：
+   文本类 `text` `textarea` `password`；数值类 `number` `slider` `rate`；
+   布尔类 `checkbox` `switch`；选项类 `radio-group` `checkbox-group` `select` `segmented`；
+   弹出类 `date` `time` `date-range` `color` `cascader` `tree-select` `autocomplete` `transfer`。
+   库里还有别的组件（表格、弹窗、导航…），但**不是字段** —— 见 SKILL §7。
+5. **选项型字段必须给 `options`**（`select` / `radio-group` / `checkbox-group` / `segmented` /
+   `color` / `autocomplete` / `cascader` / `tree-select` / `transfer`）。
+   **两种写法都行**：`[{ "value": "a", "label": "甲" }]` 或直接 `["a", "b"]`（后者显示文案就用取值本身）。
+   `cascader` / `tree-select` 可以在项上写 `children` 往下嵌。
 6. **`pattern` 写字符串**（不是正则字面量）；`validator` / `asyncValidator` 是函数，别写。
 7. **`dependencies` 只能引用本表单里存在的字段名。**
-8. **注意值的形状与 `mode` 挂钩**：`select` 在 `mode: "multiple"` 时值是**数组**，
-   `default` 与 `required` 要按数组写；其余情况是字符串。
+8. **值的形状是「类型 + 属性」的函数**，`default` 要按它写：
+   - 标量：文本 / 数值 / 布尔 / 日期时间 / `color` / `cascader` / `segmented` 等；
+   - **数组**：`transfer`、多选的 `select` / `tree-select`（`mode: "multiple"`）、`checkbox-group`；
+   - **元组**：`date-range` 必须是**两头齐全**的数组（`["2026-01-01","2026-01-31"]`）——
+     只给一头表示"还没选完"，不能当初始值。
+   写错了校验器会明确告诉你这个类型期望什么形状。
 
 ## 3. 写校验规则用 shorthand，不要用 rules
 

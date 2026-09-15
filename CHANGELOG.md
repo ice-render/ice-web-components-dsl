@@ -1,5 +1,76 @@
 # Changelog
 
+## 0.3.0 - 2026-09-15
+
+### 新增
+
+- **字段类型 11 → 20。** 一次接完清单里"能当字段"的全部组件：
+
+  | 新类型 | 组件 | 值 |
+  |---|---|---|
+  | `color` | `ICEColorPicker` | string（hex） |
+  | `rate` | `ICERate` | number（`max` = 满分几颗星） |
+  | `time` | `ICETimePicker` | string（`HH:mm:ss`；`format` 是**字符串**联合，所以能进 DSL） |
+  | `segmented` | `ICESegmented` | string |
+  | `autocomplete` | `ICEAutoComplete` | string |
+  | `cascader` | `ICECascader` | string（最深一层的叶子） |
+  | `tree-select` | `ICETreeSelect` | string / string[]（随 `mode`） |
+  | `transfer` | `ICETransfer` | string[] |
+  | `date-range` | `ICEDateRangePicker` | `[起, 止]` 元组 |
+
+- **`options` 两种写法都收**：`[{value,label}]` 或裸字符串 `["a","b"]`。
+  库里不同控件要的形状不一样（`colors: string[]` / `options: string[]` / `{value,label}[]` /
+  `nodes: {key,label}` / `dataSource: {key,title}`），**那些差别由编译期归一化**。
+  逼出这条的直接原因：`color` / `autocomplete` 的选项**不能**归一化成 `{value,label}` ——
+  传对象进去组件不报错，**色块画成空白**、候选显示成 `[object Object]`。
+- **`options` 支持嵌套 `children`**（`cascader` / `tree-select`），逐层归一化。
+- **`default` 的形状校验按「类型 + 属性」算**（`fieldValueShape()`）。
+- 新增 `TREE_OPTION_FIELD_TYPES`、`fieldValueShape()`、`FormDslValueShape`；
+  新增诊断码 `invalid-format`。
+
+### 修复
+
+- **`checkbox-group` 的数组默认值一直被拒。** 原先对选项型字段一律要求
+  `typeof default === 'string'`，而报错文案还写着"必须是字符串数组" ——
+  **多选组从来就设不了初值**。现在按 `fieldValueShape()` 判，数组/元组各按各的形状检。
+- **`placeholder` 从来没传给过 6 个老类型**（`checkbox` / `switch` / `radio-group` /
+  `checkbox-group` / `select` / `date`）。`createControl` 里那 6 个分支写的是
+  `...passthrough, width, …`，而 `base` 才是装 `placeholder` / 初值 / 宽度 / `props` 的地方。
+  TypeScript 抓不到 —— `placeholder` 在这些 Options 接口里都是**可选**的。
+  症状是"下拉框、日期框的占位文案不显示"。
+- **`ICERadioButton` / `ICEUpload` 不进 DSL。** 判据从"看文档"改成**运行时刻**：
+  `ICERadioButton.getFormValue()` 返回的是**布尔**（只表示自己勾没勾，互斥要调用方维护）→
+  当字段会做出"两个都能选上"的假单选；`ICEUpload.setFormValue` 是基类默认的**照收不误**、
+  组件本身不参与取值 → 没实现这条约定。证据固化成 `tests/field-values.test.ts`。
+  在此之前我在这件事上连错两次（都因为拿文档当真相）：
+  清单的方法名曾解析成 `setValue(hex: string)`（带调用语法），于是
+  `methods.includes('getFormValue')` 永远为假；修好之后又发现
+  `getFormValue` 是 `ICEWidget` **基类**给的、人人都有，压根不是判别信号。
+- `setFormValue` 的**事实**不再从文档推断：`docs/api/*.md` 只记组件**自己声明的**方法，
+  继承来的一律没有（`ICETextArea` 明明能用，文档里却"没有 `getFormValue`"）。
+
+### 验证
+
+- **128 单测（6 套件）+ 12 e2e 全绿**（`npm run verify:full`）。
+- 新增 `tests/field-values.test.ts`（运行时证据）、`tests/control-options.test.ts`（跨类型不变量）。
+  后者在**构造函数入口**拦一道，逐一验证每个类型的 `placeholder` / `props` / `default` / `width`
+  都到达了控件 —— 试过读 `state.placeholder`，18/20 个类型报 undefined（连明确能用的 `select` 也是），
+  因为占位文案没有统一的存放点；**拿"每个组件各不相同"的地方当探针，
+  测出来的是组件的内部布局，不是"DSL 有没有把键传下去"**。
+- 下游 `ice-agent-console` 新增「看看新控件都能用吗」剧本（10 个字段各来一个）
+  与 `e2e/showcase.spec.ts`。两条用例分别守：
+  ①「色板真的有色」（在色板区域数**不同的色相**，≥5 种）与「占位文案真的有字」；
+  ②「值真的进了取值回路」（往 10 个新控件写值，再从表单模型读回来）。
+- 四条门禁各做过一次 A/B：把 `select` 分支退回 `...passthrough`（placeholder 门禁红）、
+  把 `color` 退回 `normalizeOptions`（色板公开 API 断言红）。
+
+### 说明
+
+- `date-range` 的 `required` 语义**定案**：两头都在才算填完。理由是运行时的 ——
+  `setFormValue` 对不完整区间会回落成 `[null, null]`，所以"只选一头"本来就等价于没填。
+- `time` 的 `format` 是字符串联合（能进 DSL），而 `date` 的 `format` 是**函数**（进不了）——
+  同一个名字、两种性质，这条差异在两边文档里都写明了。
+
 ## 0.2.0 - 2026-09-15
 
 ### 新增

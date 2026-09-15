@@ -40,7 +40,7 @@
       "properties": {
         "required": { "type": "boolean" },
         "min": { "type": "number" },
-        "max": { "type": "number" },
+        "max": { "type": "number", "description": "rate 上是「满分几颗星」，会映射到组件的 count 并同时进规则" },
         "minLength": { "type": "number" },
         "maxLength": { "type": "number" },
         "pattern": { "type": "string", "description": "正则字符串（JSON 写不出正则字面量）" },
@@ -55,16 +55,20 @@
         "type": {
           "enum": [
             "text", "textarea", "password", "number", "slider",
-            "checkbox", "switch", "radio-group", "checkbox-group", "select", "date"
+            "checkbox", "switch", "radio-group", "checkbox-group", "select", "date",
+            "color", "rate", "time", "segmented", "autocomplete",
+            "cascader", "tree-select", "transfer", "date-range"
           ]
         },
         "label": { "type": "string", "description": "省略时用 name" },
         "placeholder": { "type": "string" },
-        "default": { "description": "类型需与字段类型一致；选项型字段必须是某个选项的 value" },
+        "default": {
+          "description": "类型需与字段类型一致。形状是「类型 + 属性」的函数：date-range 要两头齐全的数组（如 [\"2026-01-01\",\"2026-01-31\"]）、transfer 与多选 select/tree-select 是数组、其余是标量"
+        },
 
         "required": { "type": "boolean" },
-        "min": { "type": "number", "description": "number/slider 上会同时约束控件与生成规则" },
-        "max": { "type": "number" },
+        "min": { "type": "number", "description": "number/slider/rate 上会同时约束控件与生成规则（rate 上是「至少几颗星」）" },
+        "max": { "type": "number", "description": "rate 上是「满分几颗星」，会映射到组件的 count 并同时进规则" },
         "minLength": { "type": "number" },
         "maxLength": { "type": "number", "description": "文本类字段上会同时限制输入长度与生成规则" },
         "pattern": { "type": "string" },
@@ -80,14 +84,14 @@
         "options": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/definitions/option" },
-          "description": "select / radio-group / checkbox-group 必需"
+          "items": { "oneOf": [{ "type": "string" }, { "$ref": "#/definitions/option" }] },
+          "description": "选项型字段必需（select / radio-group / checkbox-group / color / segmented / autocomplete / cascader / tree-select / transfer）。两种写法都行：[{value,label}] 或 [\"a\",\"b\"]；cascader / tree-select 可在项上写 children 往下嵌"
         },
 
         "step": { "type": "number" },
         "precision": { "type": "number" },
         "range": { "type": "boolean" },
-        "mode": { "enum": ["single", "multiple", "tags"] },
+        "mode": { "enum": ["single", "multiple", "tags"], "description": "select 支持三种；tree-select 只有 single / multiple（未列出的取值会给出诊断）" },
         "showSearch": { "type": "boolean" },
         "placement": {
           "enum": [
@@ -99,6 +103,9 @@
         },
         "direction": { "enum": ["horizontal", "vertical"] },
         "maxChecked": { "type": "number" },
+        "format": { "enum": ["HH:mm:ss", "HH:mm"], "description": "time 的值格式（date 的 format 是函数，进不了 DSL）" },
+        "separator": { "type": "string", "description": "cascader 已选路径的分隔符" },
+        "block": { "type": "boolean", "description": "segmented 各段等宽铺满整条（默认 true）" },
         "allowClear": { "type": "boolean" },
         "showCount": { "type": "boolean" },
         "showToggle": { "type": "boolean" },
