@@ -215,6 +215,17 @@
         $('diagnostics').innerHTML = lines.length ? lines.join('\n') : '<span class="ok">✓ 校验通过</span>';
       }
 
+      /**
+       * 宿主能给的宽度：**表单多宽取决于它被放在哪儿，DSL 不知道这件事**。
+       * 这里就用 #stage 的内容宽度（去掉 padding），上限 560 免得宽屏上拉成一条长带。
+       * 不传的话会退回 dsl.width ?? 360 —— 在更宽的容器里右边就会空出一片（见 README §8.1）。
+       */
+      function hostWidth() {
+        const stage = $('stage');
+        const pad = 32; // #stage 的 padding: 16px
+        return Math.max(240, Math.min(560, stage.clientWidth - pad));
+      }
+
       function render() {
         $('values').textContent = '';
         window.__form = null;
@@ -242,6 +253,7 @@
 
         try {
           current = ICEWEBDSL.renderFormDsl('form', dsl, {
+            width: hostWidth(),
             onSubmit(values) {
               $('values').textContent = '提交值：' + JSON.stringify(values);
             },
@@ -250,11 +262,27 @@
           // 调试 / e2e 用：canvas 里没有 DOM 目标，测试要点中控件就得拿到它的位置
           window.__form = current;
           // 画布尺寸是宿主的事：DSL 不管坐标，也不管画布多大
-          current.resize(440, 500);
+          fit();
         } catch (err) {
           $('diagnostics').innerHTML = '<span class="error">[错误]</span> ' + err.message;
           $('status').textContent = '';
         }
+      }
+
+      /**
+       * 按当前容器宽度重新对齐。
+       *
+       * `setWidth()` 管**内容**、`resize()` 管**画布** —— 两件事，两个都要调
+       * （窗口变窄之后只调 resize，画布窄了而表单还是原来那么宽）。
+       * 高度同样是量出来的：先给一个宽松高度让它排一次，量完再收紧。
+       */
+      function fit() {
+        if (!current) return;
+        const width = hostWidth();
+        current.setWidth(width);
+        current.resize(width, 720);
+        const measured = current.measureContentHeight();
+        current.resize(width, measured > 0 ? Math.ceil(measured) + 24 : 500);
       }
 
       document.querySelectorAll('[data-preset]').forEach((button) => {
@@ -264,6 +292,8 @@
         });
       });
       $('render').addEventListener('click', render);
+      // 容器尺寸变了要重新对齐 —— 这一条就是 README §8.1 说的那件事
+      window.addEventListener('resize', fit);
 
       setPreset(presetFromLocation());
       render();

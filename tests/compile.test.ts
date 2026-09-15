@@ -169,6 +169,126 @@ describe('意图级默认', () => {
   });
 });
 
+/**
+ * 宽度对齐。
+ *
+ * 这一组是**实测缺陷的回归**：宿主容器 896 宽时右边空掉 667px（74%）。
+ * 根因不是渲染器画错，是宽度在 ICE 里没有"父级拉满"的自动传导 ——
+ * `ICEForm` 的 `ICEBoxLayout({align:'stretch'})` 只拉 `ICEFormItem`，**不拉控件**；
+ * 于是每个控件落到各自的出厂默认（ICETextField 200、ICEInputNumber 140、ICESelect 200…），
+ * 同一张表单里几个控件宽度还互不相同。
+ * 所以 DSL 这边必须给"意图级默认宽度"，并且宿主改尺寸时要能整棵树重新对齐。
+ */
+describe('宽度对齐', () => {
+  /** 宽度存在各组件的 `state` 上（`form.width` / `item.width` 都是 undefined）。 */
+  const w = (node: any): number | undefined => node?.state?.width;
+
+  it('不传 width 时用 dsl.width，再退回 360 —— 而且**所有**控件统一到这个宽度', () => {
+    const compiled = compileFormDsl(doc({ width: 420 } as any));
+    expect(w(compiled.container)).toBe(420);
+    expect(w(compiled.form)).toBe(420);
+    // 关键：不是 200 / 140 / 200 各回各家
+    expect([0, 1, 2].map((i) => w(controlOf(compiled, i)))).toEqual([420, 420, 420]);
+    compiled.destroy();
+
+    // 连 dsl.width 都没有 → 360
+    const fallback = compileFormDsl(doc());
+    expect([0, 1, 2].map((i) => w(controlOf(fallback, i)))).toEqual([360, 360, 360]);
+    fallback.destroy();
+  });
+
+  it('options.width 优先于 dsl.width（宿主说了算：表单多宽取决于它被放哪儿）', () => {
+    const compiled = compileFormDsl(doc({ width: 420 } as any), { width: 896 });
+    expect(w(compiled.container)).toBe(896);
+    expect(w(compiled.form)).toBe(896);
+    expect([0, 1, 2].map((i) => w(controlOf(compiled, i)))).toEqual([896, 896, 896]);
+    compiled.destroy();
+  });
+
+  it('表单项始终占满一行（`stretch` 拉的是它，所以它的宽度必须显式给）', () => {
+    const compiled = compileFormDsl(doc(), { width: 700 });
+    // 不给的话 ICEFormItem 会从控件宽度反推 `max(控件宽, 120)` —— 那才是"拉不满"的直接原因
+    expect([0, 1, 2].map((i) => w(itemOf(compiled, i)))).toEqual([700, 700, 700]);
+    compiled.destroy();
+  });
+
+  it('field.width 逐字段覆盖仍然生效（显式意图不被默认值吃掉）', () => {
+    const compiled = compileFormDsl(
+      doc({
+        fields: [
+          { name: 'full', type: 'text' },
+          { name: 'narrow', type: 'number', width: 120 },
+        ],
+      } as any),
+      { width: 800 }
+    );
+    expect(w(controlOf(compiled, 0))).toBe(800);
+    expect(w(controlOf(compiled, 1))).toBe(120); // 我写的 120，不是 800
+    // 但它所在的行还是满宽 —— 行宽是布局，控件宽是控件自己的事，两者不冲突
+    expect(w(itemOf(compiled, 1))).toBe(800);
+    compiled.destroy();
+  });
+
+  it('setWidth 把表单 + 所有控件重新对齐，但**不动**显式写宽的字段', () => {
+    const compiled = compileFormDsl(
+      doc({
+        fields: [
+          { name: 'a', type: 'text' },
+          { name: 'pinned', type: 'text', width: 120 },
+        ],
+      } as any),
+      { width: 800 }
+    );
+
+    compiled.setWidth(500);
+
+    expect(w(compiled.container)).toBe(500);
+    expect(w(compiled.form)).toBe(500);
+    expect(w(controlOf(compiled, 0))).toBe(500);
+    expect(w(itemOf(compiled, 0))).toBe(500);
+    // 显式宽度是意图，重排时不该被抹掉
+    expect(w(controlOf(compiled, 1))).toBe(120);
+    expect(w(itemOf(compiled, 1))).toBe(500);
+    compiled.destroy();
+  });
+
+  it('setWidth 对非法值不做事（不把布局弄崩）', () => {
+    const compiled = compileFormDsl(doc(), { width: 800 });
+    compiled.setWidth(0);
+    compiled.setWidth(NaN);
+    compiled.setWidth(-10);
+    expect(w(compiled.form)).toBe(800);
+    compiled.destroy();
+  });
+
+  it('标题与说明跟着一起对齐（它们是容器的子节点，不跟会冒出去）', () => {
+    const compiled = compileFormDsl(doc(), { width: 800 });
+    // ICEGroup 暴露的是 childNodes（没有 getChildren）；顺序：标题、说明、表单、提交按钮
+    const kids = (compiled.container as any).childNodes;
+    expect(w(kids[0])).toBe(800);
+    compiled.setWidth(640);
+    expect(w(kids[0])).toBe(640);
+    compiled.destroy();
+  });
+
+  it('horizontal 布局要让出标签那一条（否则控件把标签挤没）', () => {
+    const compiled = compileFormDsl(doc({ layout: 'horizontal' } as any), { width: 800 });
+    // ICEFormItem 默认 labelWidth 80
+    expect(w(controlOf(compiled, 0))).toBe(720);
+    expect(w(itemOf(compiled, 0))).toBe(800);
+
+    compiled.setWidth(400);
+    expect(w(controlOf(compiled, 0))).toBe(320);
+    compiled.destroy();
+  });
+
+  it('horizontal 下让完标签也不会把控件压到负/零宽', () => {
+    const compiled = compileFormDsl(doc({ layout: 'horizontal' } as any), { width: 150 });
+    expect(w(controlOf(compiled, 0))).toBe(120); // Math.max(120, 150-80)
+    compiled.destroy();
+  });
+});
+
 describe('表单行为', () => {
   it('getValues / setValues / reset', () => {
     const compiled = compileFormDsl(doc());

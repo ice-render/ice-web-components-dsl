@@ -54,6 +54,11 @@ export interface CompiledForm {
   getValues(): Record<string, any>;
   setValues(values: Record<string, any>): void;
   reset(): void;
+  /**
+   * 把表单与所有控件重新对齐到一个新宽度（宿主容器尺寸变了时调）。
+   * 逐字段显式写了 `width` 的字段不跟着变 —— 那是显式意图。
+   */
+  setWidth(width: number): void;
   /** 同步提交：校验不过返回 false，不触发 `onSubmit`。 */
   submit(): boolean;
   /** 异步提交：先同步规则、后 asyncValidator。 */
@@ -117,8 +122,12 @@ function toNativeRules(field: FormDslField): any[] {
  * - 文本类的 `maxLength` 既限制输入长度，也进规则。
  * 原生路径这两件事互不相干，模型只会写其中一个。
  */
-function createControl(field: FormDslField): any {
-  const width = field.width;
+function createControl(field: FormDslField, defaultWidth: number): any {
+  // **意图级默认**：竖向表单里控件应当撑满表单宽度。
+  // 不这么做的话每个控件会落到各自的出厂默认（ICETextField 200、ICEInputNumber 140、
+  // ICESelect 200…），同一张表单里几个控件宽度互不相同 —— 实测右边能空掉 74%。
+  // `field.width` 仍然可以逐字段覆盖。
+  const width = field.width ?? defaultWidth;
   const passthrough = field.props || {};
   const base: Record<string, any> = { value: undefined, width, ...passthrough };
   if (field.placeholder !== undefined) base.placeholder = field.placeholder;
@@ -216,7 +225,17 @@ function createControl(field: FormDslField): any {
  * 校验不通过会抛 `FormDslCompileError`（带结构化诊断）。
  * 想「先看诊断再决定要不要画」就先调 `validateFormDsl`。
  */
-export function compileFormDsl(dsl: FormDslDocument): CompiledForm {
+export interface CompileFormOptions {
+  /**
+   * 宿主能给的宽度（CSS 像素）。
+   *
+   * 不传就用 `dsl.width`，再退回 360。**宿主应该传** —— 表单多宽取决于它被放哪儿，
+   * 而 DSL 不知道这件事。传了之后表单与所有控件会一起对齐到这个宽度。
+   */
+  width?: number;
+}
+
+export function compileFormDsl(dsl: FormDslDocument, options: CompileFormOptions = {}): CompiledForm {
   const diagnostics = validateFormDsl(dsl);
   if (!diagnostics.valid) {
     throw new FormDslCompileError(
@@ -226,8 +245,14 @@ export function compileFormDsl(dsl: FormDslDocument): CompiledForm {
   }
 
   const gap = dsl.gap ?? 12;
-  const formWidth = dsl.width ?? 360;
+  const formWidth = options.width ?? dsl.width ?? 360;
+  const layout = dsl.layout ?? 'vertical';
+  // 横向布局时标签占左边，控件区要相应让出来（80 是 ICEFormItem 的默认 labelWidth）
+  const LABEL_WIDTH = 80;
+  const controlWidth = layout === 'horizontal' ? Math.max(120, formWidth - LABEL_WIDTH) : formWidth;
   const fieldNames: string[] = [];
+  /** 显式写了 `width` 的字段名：`setWidth` 时不动它们。 */
+  const explicitWidths = new Set(dsl.fields.filter((f) => f.width !== undefined).map((f) => f.name));
 
   const form = new ICEForm({ width: formWidth, gap });
   const items = dsl.fields.map((field) => {
@@ -235,11 +260,13 @@ export function compileFormDsl(dsl: FormDslDocument): CompiledForm {
     return new ICEFormItem({
       name: field.name,
       label: field.label ?? field.name,
-      control: createControl(field),
+      control: createControl(field, controlWidth),
       rules: toNativeRules(field),
       ...(field.dependencies ? { dependencies: field.dependencies } : {}),
-      ...(field.width !== undefined ? { width: field.width } : {}),
-      layout: dsl.layout ?? 'vertical',
+      // 表单项的宽度显式给：不给的话 ICEFormItem 会从控件自己的宽度反推（`max(控件宽, 120)`），
+      // 而 ICEForm 的 align:'stretch' 只拉表单项、不拉控件 —— 于是"拉满"对视觉结果没有作用。
+      width: formWidth,
+      layout,
     });
   });
   form.addItems(items);
@@ -251,12 +278,12 @@ export function compileFormDsl(dsl: FormDslDocument): CompiledForm {
   // （smoke 时肉眼可见）。这里的容器是**纯布局容器**，外观交给宿主（比如冰蓝竖线那种外框）。
   const container = new ICEGroup({ width: formWidth });
   container.setLayout(new ICEBoxLayout({ axis: 'y', gap }));
-  if (dsl.title) {
-    container.addChild(new ICETypography({ text: dsl.title, level: 4, width: formWidth }));
-  }
-  if (dsl.description) {
-    container.addChild(new ICETypography({ text: dsl.description, type: 'secondary', width: formWidth }));
-  }
+  const titleNode = dsl.title ? new ICETypography({ text: dsl.title, level: 4, width: formWidth }) : null;
+  const descNode = dsl.description
+    ? new ICETypography({ text: dsl.description, type: 'secondary', width: formWidth })
+    : null;
+  if (titleNode) container.addChild(titleNode);
+  if (descNode) container.addChild(descNode);
   container.addChild(form);
 
   const submitText = dsl.submitText === undefined ? '提交' : dsl.submitText;
@@ -297,6 +324,30 @@ export function compileFormDsl(dsl: FormDslDocument): CompiledForm {
         const i = listeners.indexOf(listener);
         if (i >= 0) listeners.splice(i, 1);
       };
+    },
+    /**
+     * 把表单与**所有控件**重新对齐到一个新宽度。
+     *
+     * 宿主在容器尺寸变化时调它。之所以要一层层写下去：宽度在 ICE 里是每个组件自己的属性，
+     * 没有"父级拉满"的自动传导（见 compileFormDsl 里那段注释），所以必须显式对齐整棵树。
+     */
+    setWidth(width: number) {
+      if (!(width > 0)) return;
+      const nextControlWidth = layout === 'horizontal' ? Math.max(120, width - LABEL_WIDTH) : width;
+      container.setState({ width });
+      form.setState({ width });
+      for (const item of form.getItems() as any[]) {
+        item.setState({ width });
+        const control = item.getControl?.();
+        // 逐字段覆盖过宽度的（`field.width`）不跟着变 —— 那是显式意图
+        if (control && !explicitWidths.has(item.getName?.() ?? '')) {
+          control.setState({ width: nextControlWidth });
+        }
+      }
+      titleNode?.setState({ width });
+      descNode?.setState({ width });
+      form.doLayout();
+      container.doLayout();
     },
     destroy() {
       listeners.length = 0;

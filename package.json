@@ -1,6 +1,6 @@
 {
   "name": "ice-web-components-dsl",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "大漠穷秋",
   "description": "A JSON-first DSL layer for AI agents to build forms with ice-web-components.",

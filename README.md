@@ -78,8 +78,8 @@ ice.addChild(container);
 | --- | --- |
 | `validateFormDsl(dsl)` | **任何输入都不抛异常**。返回 `{ valid, errors, warnings }`，每条诊断带 `severity` / `code` / `message` / `path` |
 | `formatDiagnostics(result)` | 把校验结果转成可读文本 |
-| `compileFormDsl(dsl)` | → `{ container, form, model, submitButton, fieldNames, getValues, setValues, reset, submit, submitAsync, onSubmit, destroy }`。校验不过抛 `FormDslCompileError`（带诊断） |
-| `renderFormDsl(target, dsl, opts)` | 一步到位：建 ICE 实例 + 挂组件 + 接提交。返回 `{ ice, compiled, diagnostics, resize, measureContentHeight, destroy }` |
+| `compileFormDsl(dsl, opts?)` | → `{ container, form, model, submitButton, fieldNames, getValues, setValues, reset, setWidth, submit, submitAsync, onSubmit, destroy }`。`opts.width` 见 §8.1。校验不过抛 `FormDslCompileError`（带诊断） |
+| `renderFormDsl(target, dsl, opts?)` | 一步到位：建 ICE 实例 + 挂组件 + 接提交。返回 `{ ice, compiled, diagnostics, resize, setWidth, measureContentHeight, destroy }`。`opts.width` 见 §8.1 |
 
 ## 4. 字段类型与它们接受的属性
 
@@ -172,6 +172,44 @@ DSL 里**不可表达** `left` / `top`。字段纵向堆叠交给 `ICEForm` 的�
 宿主负责的是**画布多大**（`renderFormDsl` 的 `resize(w, h)`，内部走引擎的
 `ICE.fitCanvasToDisplaySize()`），而不是每个控件摆在哪。
 
+### 8.1 宽度：宿主说了算，但必须显式告诉它
+
+宽度不在 DSL 里定，因为**表单多宽取决于它被放在哪儿**，而 DSL 不知道这件事。
+宿主通过 `width` 传进来：
+
+```js
+const result = renderFormDsl(canvas, dsl, { width: card.clientWidth });
+// 或者只要组件树
+const compiled = compileFormDsl(dsl, { width: card.clientWidth });
+```
+
+不传则退回 `dsl.width`，再退回 `360`。
+
+容器尺寸变了要调 `setWidth()` —— **`resize()` 管画布，`setWidth()` 管内容**，两件事都要做：
+
+```js
+window.addEventListener('resize', () => {
+  result.setWidth(card.clientWidth);   // 表单与所有控件重新对齐
+  result.resize(card.clientWidth, height); // 画布与命中区跟着走
+});
+```
+
+**为什么宽度要一层层显式写下去**：宽度在 ICE 里是每个组件自己的属性，
+**没有"父级拉满"的自动传导**。`ICEForm` 的 `ICEBoxLayout({ align: 'stretch' })` 拉的是
+`ICEFormItem`，不拉控件；而 `ICEFormItem.doLayout` 只按 `control.state.width`
+（缺省 `200`）**定位**控件，不改变它。所以只写 `align: 'stretch'` 对视觉结果完全没有作用，
+每个控件会落到自己的出厂默认 —— `ICETextField` 200、`ICEInputNumber` 140、`ICESelect` 200，
+同一张表单里几个控件宽度还互不相同（实测宿主 896 宽时右侧空掉 667px，74%）。
+
+编译期给的默认规则：
+
+| 布局 | 控件宽度 |
+| --- | --- |
+| `vertical`（默认） | 表单宽度 |
+| `horizontal` | `max(120, 表单宽度 - 80)`，那 80 是 `ICEFormItem` 的默认 `labelWidth`，让给标签 |
+
+逐字段写的 `width` 优先级最高，且 `setWidth()` **不会**动它 —— 显式意图不该被重排抹掉。
+
 ## 9. 诊断码
 
 `validate` 返回的每条诊断都带 `code` 与 `path`，便于程序化处理与回灌给 agent。
@@ -248,8 +286,18 @@ npm run verify        # types:check + build + jest
 npm run verify:full   # 上面 + playwright（示例页真机冒烟）
 ```
 
+当前规模：**70 单测 / 3 套件**，**9 e2e / 1 spec**。
+
 示例页 e2e 的判据不是"按钮存在"，而是：画布上真的有墨、
 **真实点中画布上的提交按钮**能走完校验 → 提交这条链、诊断里带可操作的替代信息。
+
+其中两例按**着墨包围盒**判排布（"表单铺满宿主给的宽度" / "窗口变窄后表单跟着重新对齐"）——
+`countInk` 那类"画了没有"的断言抓不到"画出来了但只占左边一小块"：
+着墨量照样几千。这一组是实测缺陷的回归，见 §8.1。
+
+> 知道这个数字从哪来很重要：宽度这条链上没有一处会**报错**。
+> 修复前宿主 896 宽、表单只画了 229px —— 校验通过、编译通过、渲染成功，
+> 只有人会看出"右边怎么空了那么多"。
 
 ## 13. 与家族其它包的关系
 

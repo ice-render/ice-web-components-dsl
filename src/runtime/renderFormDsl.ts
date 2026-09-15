@@ -15,6 +15,13 @@ export interface RenderFormDslOptions {
   onSubmit?: (values: Record<string, any>) => void;
   /** 设备像素比。默认取 `devicePixelRatio`。 */
   dpr?: number;
+  /**
+   * 宿主能给的宽度（CSS 像素）。
+   *
+   * **建议传**：表单多宽取决于它被放哪儿，而 DSL 不知道这件事。不传就用 `dsl.width`
+   * 再退回 360 —— 那时如果宿主容器比它宽，右边会空出一大片。
+   */
+  width?: number;
 }
 
 export interface RenderFormDslResult {
@@ -29,6 +36,11 @@ export interface RenderFormDslResult {
    * 应用层不要自己写 `canvasWidth` / `canvasHeight`，那是最容易漏掉 dpr 的地方。
    */
   resize(cssWidth: number, cssHeight: number): void;
+  /**
+   * 把表单对齐到一个新宽度（画布尺寸用 `resize`，这一条管内容）。
+   * 宿主容器变宽时两个都要调。
+   */
+  setWidth(width: number): void;
   /** 内容实际需要的高度（给宿主用来决定画布该多高）。布局未完成时返回 0。 */
   measureContentHeight(): number;
   destroy(): void;
@@ -46,7 +58,7 @@ export function renderFormDsl(
   options: RenderFormDslOptions = {}
 ): RenderFormDslResult {
   const diagnostics = validateFormDsl(dsl);
-  const compiled = compileFormDsl(dsl);
+  const compiled = compileFormDsl(dsl, { width: options.width });
 
   const ice = new ICE();
   ice.init(target as any, { dpr: options.dpr ?? (globalThis as any).devicePixelRatio ?? 1 });
@@ -60,6 +72,10 @@ export function renderFormDsl(
     diagnostics,
     resize(cssWidth, cssHeight) {
       ice.fitCanvasToDisplaySize(cssWidth, cssHeight);
+    },
+    /** 表单本身的对齐宽度（与画布尺寸是两件事）。 */
+    setWidth(width) {
+      compiled.setWidth(width);
     },
     /**
      * 内容实际需要的高度。

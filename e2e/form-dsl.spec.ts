@@ -39,12 +39,60 @@ async function ink(page: Page): Promise<number> {
   });
 }
 
+/**
+ * 着墨部分的包围盒与它占画布的比例（CSS 像素）。
+ *
+ * `ink()` 只回答"画了没有"。一个表单把控件画在左边 360px 里、右边空 500px，
+ * 着墨量照样是几千 —— 这种"画出来了但没铺满"的缺陷只有按**排布**判才看得见。
+ */
+async function inkBounds(page: Page): Promise<{ right: number; widthRatio: number }> {
+  return page.evaluate(() => {
+    const canvas = document.getElementById('form') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let minX = canvas.width;
+    let maxX = -1;
+    for (let y = 0; y < canvas.height; y++) {
+      const row = y * canvas.width * 4;
+      for (let x = 0; x < canvas.width; x++) {
+        if (data[row + x * 4 + 3] !== 0) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+        }
+      }
+    }
+    // 逻辑像素 = 画布像素 / (backing / css)。不写死 dpr —— 换个 profile 就会静默错一倍。
+    const box = canvas.getBoundingClientRect();
+    const scale = box.width > 0 ? canvas.width / box.width : 1;
+    return {
+      right: maxX / scale,
+      widthRatio: canvas.width > 0 ? (maxX - minX + 1) / canvas.width : 0,
+    };
+  });
+}
+
 function texts(page: Page) {
   return {
     diagnostics: page.locator('#diagnostics'),
     status: page.locator('#status'),
     values: page.locator('#values'),
   };
+}
+
+/**
+ * 等到画布上真的有墨。
+ *
+ * **不能直接读一次就断言**：渲染是引擎的帧循环干的活，`render()` 里 `renderFormDsl()` 返回时
+ * 画面还没落到画布上 —— 直接量会量到 0，而且"有时候过、有时候不过"取决于那一瞬的调度。
+ * 这个竞态原先被一个固定的 `resize(440,500)`（尺寸没变、不需要重排）掩盖着，
+ * 表单层改成按内容量高度之后立刻显出来了。
+ */
+async function waitForInk(page: Page, min = 5000): Promise<number> {
+  let last = -1;
+  await expect
+    .poll(async () => (last = await ink(page)), { message: '画布上迟迟没有墨', timeout: 5000 })
+    .toBeGreaterThan(min);
+  return last;
 }
 
 test('合法 DSL：表单真的画出来了', async ({ page }) => {
@@ -57,9 +105,8 @@ test('合法 DSL：表单真的画出来了', async ({ page }) => {
   await expect(texts(page).status).toContainText('已渲染');
   await expect(texts(page).diagnostics).toContainText('校验通过');
 
-  // 画布 440×500 @ dpr=2 → 880×1000，着墨量应当可观（不是空画布）
-  const inkCount = await ink(page);
-  expect(inkCount, '表单必须真的画出来').toBeGreaterThan(5000);
+  // 画布是 560×390 左右（宿主按 #stage 的宽度算，高度是量出来的），着墨量应当可观
+  await waitForInk(page);
 
   // 三个字段 + 提交按钮都在编译产物里
   const fieldNames = await page.evaluate(() => (window as any).__form.compiled.fieldNames);
@@ -138,5 +185,57 @@ test('改回合法预设后能重新渲染（旧的实例被收掉）', async ({
   await page.click('[data-preset="ok"]');
   await expect(texts(page).status).toContainText('已渲染');
   await expect(texts(page).diagnostics).toContainText('校验通过');
-  expect(await ink(page)).toBeGreaterThan(5000);
+  await waitForInk(page);
+});
+
+/**
+ * 表单要**铺满宿主给的宽度**。
+ *
+ * 这一条是实测缺陷的回归：宿主容器 896 宽时表单只在左边画了 229px，**右边空掉 667px（74%）**。
+ * 根因在 DSL 层不在渲染器：宽度在 ICE 里是每个组件自己的属性，没有"父级拉满"的自动传导 ——
+ * `align: 'stretch'` 只拉 `ICEFormItem`、**不拉控件**，于是每个控件落到各自的出厂默认
+ * （`ICETextField` 200、`ICEInputNumber` 140…），同一张表单里还互不相同。
+ * 见 README §8.1。
+ */
+test('表单铺满宿主给的宽度（不是只用左边一小块）', async ({ page }) => {
+  await page.goto('/examples/form-dsl.html');
+  await expect(texts(page).status).toContainText('已渲染');
+  // 先等画面真的落下来，否则量到的是一张还没画的空画布
+  await waitForInk(page);
+
+  const canvasWidth = await page.evaluate(
+    () => (document.getElementById('form') as HTMLCanvasElement).getBoundingClientRect().width
+  );
+  const bounds = await inkBounds(page);
+
+  expect(
+    bounds.widthRatio,
+    `着墨只占画布宽的 ${(bounds.widthRatio * 100).toFixed(1)}%，右侧空 ${(canvasWidth - bounds.right).toFixed(0)}px`
+  ).toBeGreaterThan(0.9);
+});
+
+/**
+ * 容器变窄之后要**重新对齐内容**，不能只改画布。
+ *
+ * 这是 `setWidth()` 那条路径单独的回归：`resize()` 管画布、`setWidth()` 管内容，两件事。
+ * 少了它，画布窄了而表单还是原来那么宽 —— 右边被裁掉或又空出来。
+ */
+test('窗口变窄后表单跟着重新对齐（不只是画布变窄）', async ({ page }) => {
+  await page.goto('/examples/form-dsl.html');
+  await expect(texts(page).status).toContainText('已渲染');
+  await waitForInk(page);
+
+  const wide = await inkBounds(page);
+
+  await page.setViewportSize({ width: 900, height: 900 });
+
+  // `window.resize` → `fit()` 是同步的，但布局/重绘要等一帧，所以轮询而不是赌
+  await expect
+    .poll(async () => (await inkBounds(page)).right, {
+      message: '缩窄之后表单没有跟着变窄',
+      timeout: 5000,
+    })
+    .toBeLessThan(wide.right - 50);
+
+  expect((await inkBounds(page)).widthRatio).toBeGreaterThan(0.9);
 });
