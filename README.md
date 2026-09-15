@@ -282,15 +282,44 @@ Agent 可以通过这几处使用本项目：
 
 1. npm 包导出（`validateFormDsl` / `compileFormDsl` / `renderFormDsl`）
 2. `AGENTS.md`
-3. `skills/ice-web-components-dsl/SKILL.md` —— 完整规范
+3. `skills/ice-web-components-dsl/SKILL.md` —— 完整规范（§7「库里还有什么」由清单自动生成）
 4. `prompts/agent-prompt.md` —— 短版系统提示词（输出契约 + 自检清单）
 5. `src/schema/form-dsl.schema.json` —— JSON Schema
+6. **`catalog/components.json` —— 组件清单**（机器可读，见 §11.1）
 
 > README、SKILL 与提示词里的 JSON 例子由 `tests/doc-examples.test.ts` 自动校验：
 > 示例一旦不合法（类型写错、依赖悬空、选项为空），测试就红 —— 保证 Agent 照抄的是"能跑的文档"。
 
 示例页：`examples/form-dsl.html`（带 JSON 编辑器与诊断面板，含四个预设：合法 / 类型写错 /
 选项有问题 / 依赖指向空）。
+
+### 11.1 组件清单：让 agent 知道"库里还有什么"
+
+这份 DSL 只覆盖 11 个字段类型，而 `ice-web-components` 有 84 个 UI 组件。
+**agent 的真正瓶颈不是画布，是它不知道自己有什么可选** —— 之前 SKILL 里只有那 11 行表，
+剩下的它看不见，于是"要个日期区间"也只能退回两个 `date` 字段。
+
+`catalog/components.json`（`npm run catalog` 生成）把整库摊开：分组、摘要、构造参数、
+方法、**值的形状**，以及本包加的标注 —— 哪些已接入、哪些能接但还没接、哪些根本不是字段。
+
+三条边界，都不是随手定的：
+
+1. **分组与摘要来自上游的生成产物，不是我自己列的。**
+   上游 `scripts/gen-docs.mjs` 已经有一套抽取器，而且有 `docs:check` 门禁保证
+   "每个组件都被登记过"。本包再写一个 TypeScript 解析器就是第二份抽取器，
+   两份会各自漂移，而漂移的症状是"清单里少了个字段"这种没人会发现的形态。
+   所以这里**只做搬运与重组**（用法见 `tools/gen-catalog.mjs` 顶部注释）。
+2. **"能不能当字段"是手写的** —— 那是编辑判断，源码里推不出来。
+   但两侧都有门禁：标注里的组件名要真实存在、`fieldType` 要合法，
+   **且每个已实现的类型都必须有组件认领**（加了类型却忘了说它由谁实现 → 测试红）。
+3. **清单自己知道缺什么。** `gaps` 一节列出"构造参数没进生成文档的类"（48/113，含
+   `ICEButton` / `ICETextField` 这些最常用的 —— 它们继承基类的 Options，或构造函数就是
+   `props?: any`）和"上游没写类注释的条目"。空数组不等于"没有参数"，
+   所以宁可把缺口列出来，也不糊一个 `[]` 过去。
+
+SKILL 的 §7 由同一份清单生成（标记块 `<!-- catalog:start -->`）。
+`npm run verify` 里带 `catalog` 重生成 + `tests/catalog.test.ts` 的同步门禁 ——
+**上游一改、或本包标注一改而忘了重生成，测试就红**。
 
 ## 12. 验证
 
@@ -299,7 +328,7 @@ npm run verify        # types:check + build + jest
 npm run verify:full   # 上面 + playwright（示例页真机冒烟）
 ```
 
-当前规模：**77 单测 / 3 套件**，**10 e2e / 1 spec**。
+当前规模：**98 单测 / 4 套件**，**10 e2e / 1 spec**，清单覆盖 **84 个 UI 组件**（9 组 / 185 个条目）。
 
 示例页 e2e 的判据不是"按钮存在"，而是：画布上真的有墨、
 **真实点中画布上的提交按钮**能走完校验 → 提交这条链、诊断里带可操作的替代信息。

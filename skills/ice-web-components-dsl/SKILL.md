@@ -85,7 +85,7 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 | `switch` | 开关 | boolean | — |
 | `radio-group` | 单选组 | string | `options` `direction` |
 | `checkbox-group` | 多选组 | string[] | `options` `direction` `maxChecked` |
-| `select` | 下拉选择 | string | `options` `mode` `showSearch` |
+| `select` | 下拉选择 | string（`mode: "multiple"` 时是 string[]） | `options` `mode` `showSearch` |
 | `date` | 日期选择 | string | `placement` |
 
 所有类型都还接受：`name` `type` `label` `placeholder` `default` `required`
@@ -93,6 +93,10 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 
 > 白名单之外的键会被**忽略并给出警告**，警告里会列出这个类型接受哪些键。
 > `props` 是逃生舱（内容不校验），优先用具名属性。
+
+> **上面只有 11 个类型，但库里不止这 11 个控件。** 哪些能当字段还没接、哪些根本不是字段、
+> 以及"值形状"（数组 / 随 `mode` 变 / 元组）与 `required`、`minLength` 的关系，
+> 见 **§7** —— 那一节由清单自动生成，不用记，用到再翻。
 
 `options` 的形状（`select` / `radio-group` / `checkbox-group` 必需）：
 
@@ -231,3 +235,75 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 10. 字段上没写这个类型不接受的属性（不确定就别写，校验器会告警）。
 
 **拿不准就调 `validateFormDsl()` 看一眼**：它对任何输入都不抛异常，而且诊断里会给出可用替代。
+
+---
+
+<!-- catalog:start -->
+## 7. 库里还有什么（以及为什么不让你用）
+
+> 由 `node tools/gen-catalog.mjs` 从 `ice-web-components` **1.11.2** 的生成文档自动写出，不要手改。
+> 数据源：9 组 / 185 个条目（其中组件类 113 个）。
+
+### 7.1 每个 `type` 背后是哪个组件
+
+（值的形状见 §7.4 —— 那是**本包**的知识，`ice-web-components` 的文档里推不出来。）
+
+| `type` | 组件 |
+|---|---|
+| `checkbox` | `ICECheckBox` |
+| `checkbox-group` | `ICECheckboxGroup` |
+| `date` | `ICEDatePicker` |
+| `number` | `ICEInputNumber` |
+| `password` | `ICEPasswordField` |
+| `radio-group` | `ICERadioGroup` |
+| `select` | `ICESelect` |
+| `slider` | `ICESlider` |
+| `switch` | `ICESwitch` |
+| `text` | `ICETextField` |
+| `textarea` | `ICETextArea` |
+
+### 7.2 能当字段、但 DSL 还没接的
+
+| 组件 | 建议的 `type` | 说明 |
+|---|---|---|
+| `ICEAutoComplete` | `autocomplete` | 值是 string，但 `options` 是 `string[]` 而不是 `{value,label}[]`，与现有选项模型不同形。 |
+| `ICECascader` | `cascader` | 值是**最深一层的 string**，但 `options` 是树；`getPath()` 才能回显上级 —— 往返语义不唯一，要设计。 |
+| `ICEColorPicker` | `color` | 值是 string（hex），形状干净。 |
+| `ICEDateRangePicker` | `date-range` | 值是**元组** `[string|null, string|null]`，且允许"只选了一头"的进行中状态 —— `required` 该表示"两头都在"还是"至少一头"是一个**语义决策**，不是实现问题。 |
+| `ICERadioButton` | `radio-button` | 注意：单个按钮**不管互斥**（互斥由 ICERadioGroup 维护），直接当字段会做出"两个都能选上"的假单选。 |
+| `ICERate` | `rate` | 值是 number。 |
+| `ICESegmented` | `segmented` | 值是 string，需要 `options`。 |
+| `ICETimePicker` | `time` | 值是 string（HH:mm[:ss]）。 |
+| `ICETransfer` | `transfer` | **没有 `value`**，只有 `targetKeys: string[]` —— 要先把"值"定义出来才谈得上校验。 |
+| `ICETreeSelect` | `tree-select` | 值形状同样取决于 `mode`；且 `nodes` 是树而不是 `options`。 |
+| `ICEUpload` | `upload` | **没有 `value`**，是文件选择器 —— 值该是文件列表，`required` 的含义要重新定义。 |
+
+**这些都别写进 DSL** —— 会被 `unsupported-field-type` 拦下。那是设计如此（宁可拦下也不要静默不生效），不是漏了。
+
+### 7.3 不是字段的（别往字段表里塞）
+
+| 分组 | 不是字段的那些 | 为什么 |
+|---|---|---|
+| 基础组件 | `ICEWidget` `ICEContainer` `ICEPanel` `ICESpace` `ICEGrid` `ICEGridCol` `ICEButton` `ICELabel` `ICETypography` `ICEIcon` `ICESvgIcon` `ICEIconTile` `ICESeparator` | 基础组件 —— 基类与最小构件（面板 / 按钮 / 文本 / 图标）。DSL 的表单**用**它们，但它们是"画出来的东西"，不是"被填的字段"。 |
+| 数据录入 | `ICEFormItem` | 表单项容器（DSL 的产物），不是字段。 |
+| 数据录入 | `ICEForm` | 表单容器本身（DSL 的产物），不是字段。 |
+| 数据录入 | `ICEFormList` | 重复行组（`initialRows` + `renderRow`）—— 它是"一个字段"的**复数形式**，形状是数组套字段，不是字段表能表达的。要做得新开一个 kind。 |
+| 数据展示 | `ICETable` `ICEList` `ICETree` `ICECard` `ICEStatCard` `ICEStatistic` `ICEDescriptions` `ICETimeline` `ICEProgressBar` `ICEImageView` `ICEImagePreview` `ICECalendar` `ICEAvatar` `ICEAvatarGroup` `ICETag` `ICEBadge` `ICECarousel` `ICECollapse` `ICEComment` `ICEWatermark` `ICETileMap` `ICEVirtualList` `ICEKanban` | 数据展示 —— 这些是**另一种卡**（表格卡 / 指标卡 / 时间线卡），属于新 kind，不是字段。 |
+| 反馈与状态 | `ICEAlert` `ICEModal` `ICEDrawer` `ICETooltip` `ICEPopover` `ICEPopconfirm` `ICEResult` `ICEEmpty` `ICESkeleton` `ICESpin` `ICESteps` `ICETour` `ICEFloatButton` | 反馈与状态 —— 浮层类（Modal / Drawer / Popover / Tooltip）在 ICE 里画在**同一张画布**上靠 zIndex 命中，跟"两块并排画布"的卡片结构会打架；其余是页面级状态。 |
+| 反馈与状态 | `ICEMessage` `ICENotification` | 不是组件类，是常量便捷入口。 |
+| 导航 | `ICEMenu` `ICEBreadcrumb` `ICEAnchor` `ICEBackTop` `ICEDropdown` `ICEPagination` `ICETabs` | 导航 —— 页面级结构（菜单 / 面包屑 / 分页），卡片里没有意义。 |
+| 核心与布局 | `ICEScrollPane` `ICEAffix` `ICELayout` `ICESplitter` `ICEWindow` `ICEOverlayManager` `ICEFocusManager` `ICEHoverManager` `ICEMessageManager` `ICEManager` | 核心与布局 —— 基类、管理器与布局骨架，不直接出现在业务页面里。 |
+
+### 7.4 值的形状：`required` / `minLength` 落在什么上面
+
+- **标量**（文本 / 数值 / 布尔）：`required` 判空、`minLength`/`maxLength` 判**长度**、`pattern` 判格式，都按直觉走。
+- **数组**（`checkbox-group`）：`required: true` 表示"至少选一项"，`minLength: 2` 表示"**至少选 2 项**"（判的是数组长度，不是字符串长度）。
+- **值形状随 `mode` 变**（`select` → `ICESelect`，类型是 `string|string[]`）：`mode: "multiple"` 时值是数组，其余是字符串 —— 写 `default` 与 `required` 时先确认 `mode`。
+- **元组**（将来的 `date-range` → `ICEDateRangePicker`，类型是 `[string|null,string|null]`）：值是**元组** `[string|null, string|null]`，且允许"只选了一头"的进行中状态 —— `required` 该表示"两头都在"还是"至少一头"是一个**语义决策**，不是实现问题。
+
+### 7.5 这份清单自己缺什么
+
+- **构造参数只覆盖了 65/113 个类**：48 个类的构造参数**没进生成文档**（它们继承基类的 Options，或构造函数就是 `props?: any`），`ICEButton` / `ICETextField` / `ICECheckBox` 这些最常用的都在里面。
+- **28 个条目上游没写类注释**（多为 model 与工具函数）。
+- 所以：**"清单里没看到某个键"不等于"这个键不能用"**。拿不准就 `validateFormDsl()` 看诊断，或者用 `props` 逃生舱 —— 代价是 `props` 里的键**不做校验**，写错了静默生效。
+<!-- catalog:end -->

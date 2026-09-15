@@ -1,6 +1,6 @@
 {
   "name": "ice-web-components-dsl",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "大漠穷秋",
   "description": "A JSON-first DSL layer for AI agents to build forms with ice-web-components.",
@@ -28,6 +28,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "catalog",
     "skills",
     "README.md",
     "LICENSE"
@@ -40,10 +41,12 @@
     "dev": "rollup -c -w --environment NODE_ENV:development",
     "test": "jest --runInBand",
     "types:check": "tsc --noEmit",
-    "verify": "npm run types:check && npm run build && npm test -- --runInBand",
+    "verify": "npm run types:check && npm run catalog:check && npm run build && npm test -- --runInBand",
     "prepublishOnly": "npm run verify",
     "test:e2e": "npm run build && playwright test",
-    "verify:full": "npm run verify && npm run test:e2e"
+    "verify:full": "npm run verify && npm run test:e2e",
+    "catalog": "node tools/gen-catalog.mjs",
+    "catalog:check": "node tools/gen-catalog.mjs --check"
   },
   "peerDependencies": {
     "ice-render": "^2.10.0",

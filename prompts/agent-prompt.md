@@ -37,10 +37,16 @@
 1. **只写声明，不写坐标。** 没有 `left` / `top`，也没有控件实例。
 2. **`kind` 只能是 `"form"`**。
 3. **`fields` 非空**，每个字段有 `name` 与 `type`，`name` 不重复。
-4. **选项型字段（`select` / `radio-group` / `checkbox-group`）必须给 `options`**，
+4. **`type` 只能是这 11 个**：`text` `textarea` `password` `number` `slider` `checkbox`
+   `switch` `radio-group` `checkbox-group` `select` `date`。
+   `ice-web-components` 里还有别的录入控件（日期区间、时间、评分、穿梭框…），但**还没接进本 DSL**，
+   写了会被拦下 —— 哪些能接、哪些不是字段，见 SKILL §7。
+5. **选项型字段（`select` / `radio-group` / `checkbox-group`）必须给 `options`**，
    每项 `{ "value": "...", "label": "..." }`，`label` 可省。
-5. **`pattern` 写字符串**（不是正则字面量）；`validator` / `asyncValidator` 是函数，别写。
-6. **`dependencies` 只能引用本表单里存在的字段名。**
+6. **`pattern` 写字符串**（不是正则字面量）；`validator` / `asyncValidator` 是函数，别写。
+7. **`dependencies` 只能引用本表单里存在的字段名。**
+8. **注意值的形状与 `mode` 挂钩**：`select` 在 `mode: "multiple"` 时值是**数组**，
+   `default` 与 `required` 要按数组写；其余情况是字符串。
 
 ## 3. 写校验规则用 shorthand，不要用 rules
 
@@ -51,12 +57,15 @@
 `min` / `max` 会同时约束控件与生成校验规则。分开写只会漏掉一半
 （控件不拦手输、或拦了但不报错）。文本类字段的 `maxLength` 同理。
 
+多选组里的 `minLength` 判的是**数组长度**，所以 `"minLength": 2` 就是"至少选 2 项"。
+
 ## 4. 提交前自检
 
 - [ ] `kind` 是 `"form"`，`fields` 非空
-- [ ] 字段 `name` 唯一；每个 `type` 是已知类型
+- [ ] 字段 `name` 唯一；每个 `type` 在上面的 11 个里
 - [ ] 选项型字段都有非空 `options`，且 `default` 落在选项里
-- [ ] `default` 的类型与字段类型一致（数字↔number、布尔↔checkbox/switch、字符串↔文本/选项）
+- [ ] `default` 的类型与字段类型一致（数字↔number、布尔↔checkbox/switch、字符串↔文本/选项；
+      多选 `select` 是数组）
 - [ ] `pattern` 是合法正则字符串
 - [ ] `dependencies` 引用的字段存在且不是自己
 - [ ] `min <= max`、`minLength <= maxLength`
