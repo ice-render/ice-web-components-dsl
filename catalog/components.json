@@ -2,7 +2,7 @@
   "$generated": "node tools/gen-catalog.mjs —— 不要手改这个文件",
   "from": {
     "package": "ice-web-components",
-    "version": "1.11.2",
+    "version": "1.13.0",
     "groups": "scripts/gen-docs.mjs 的 GROUPS",
     "detail": "docs/api/*.md"
   },
@@ -381,6 +381,12 @@
         "getPainter",
         "paintDecoration",
         "addChild",
+        "onMount",
+        "onUnmount",
+        "onShow",
+        "onHide",
+        "onResize",
+        "initEvents",
         "theme"
       ],
       "value": {
@@ -398,7 +404,7 @@
       "kind": "class",
       "group": "basic",
       "groupTitle": "基础组件",
-      "summary": "容器基类：在此挂布局策略（setLayout，链式返回自身）。",
+      "summary": "容器型组件基类：**应用层对外的主要入口** —— 页面、面板、工作区的默认基类。",
       "props": [],
       "methods": [
         "setLayout"
@@ -5918,6 +5924,12 @@
           "type": "number",
           "optional": true,
           "doc": "宽度（不传用组件默认值）"
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "optional": true,
+          "doc": "显式高度；不给则用「圆点 + 文字」的内容高度（circleSize + 34）"
         },
         {
           "name": "circleSize",

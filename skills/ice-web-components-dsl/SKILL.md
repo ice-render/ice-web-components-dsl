@@ -254,7 +254,7 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 <!-- catalog:start -->
 ## 7. 库里还有什么（以及为什么不让你用）
 
-> 由 `node tools/gen-catalog.mjs` 从 `ice-web-components` **1.11.2** 的生成文档自动写出，不要手改。
+> 由 `node tools/gen-catalog.mjs` 从 `ice-web-components` **1.13.0** 的生成文档自动写出，不要手改。
 > 数据源：9 组 / 185 个条目（其中组件类 113 个）。
 
 ### 7.1 每个 `type` 背后是哪个组件
