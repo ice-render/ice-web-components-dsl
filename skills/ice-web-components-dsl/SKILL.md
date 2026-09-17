@@ -254,7 +254,7 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 <!-- catalog:start -->
 ## 7. 库里还有什么（以及为什么不让你用）
 
-> 由 `node tools/gen-catalog.mjs` 从 `ice-web-components` **1.13.1** 的生成文档自动写出，不要手改。
+> 由 `node tools/gen-catalog.mjs` 从 `ice-web-components` **1.17.0** 的生成文档自动写出，不要手改。
 > 数据源：9 组 / 185 个条目（其中组件类 113 个）。
 
 ### 7.1 每个 `type` 背后是哪个组件
@@ -310,6 +310,6 @@ description: 用 JSON 声明一张表单并渲染到 canvas（ice-web-components
 ### 7.5 这份清单自己缺什么
 
 - **构造参数只覆盖了 65/113 个类**：48 个类的构造参数**没进生成文档**（它们继承基类的 Options，或构造函数就是 `props?: any`），`ICEButton` / `ICETextField` / `ICECheckBox` 这些最常用的都在里面。
-- **28 个条目上游没写类注释**（多为 model 与工具函数）。
+- **27 个条目上游没写类注释**（多为 model 与工具函数）。
 - 所以：**"清单里没看到某个键"不等于"这个键不能用"**。拿不准就 `validateFormDsl()` 看诊断，或者用 `props` 逃生舱 —— 代价是 `props` 里的键**不做校验**，写错了静默生效。
 <!-- catalog:end -->
