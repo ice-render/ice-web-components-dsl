@@ -143,9 +143,15 @@
     <script src="../node_modules/ice-web-components/dist/index.umd.js"></script>
     <script src="../dist/index.umd.js"></script>
     <script>
-      const $ = (id) => document.getElementById(id);
-
-      const PRESETS = {
+      /**
+       * 表单 DSL 渲染示例页。
+       *
+       * 页面写法与家族其它示例一致：**一页 = 一个类**，构造期把 DOM 引用、事件与首次渲染一次做完。
+       * 这页没有 `onUpdate()` —— 它的"变化"是**用户驱动**的（改 JSON / 换预设后点渲染），
+       * 不是宿主推数据，所以刷新入口就是 `render()` 本身。
+       */
+      class FormDslPage {
+        static PRESETS = {
         ok: {
           schemaVersion: 1,
           kind: 'form',
@@ -194,25 +200,32 @@
         },
       };
 
-      let current = null;
-      let wired = false;
+        constructor() {
+          this.$ = (id) => document.getElementById(id);
+          /** 当前已渲染的表单句柄（DSL 返回的对象，用来 setWidth / resize / destroy） */
+          this.current = null;
 
-      function presetFromLocation() {
-        const key = new URLSearchParams(location.search).get('preset');
-        return PRESETS[key] ? key : 'ok';
-      }
+          this.__wireToolbar();
+          this.setPreset(this.presetFromLocation());
+          this.render();
+        }
 
-      function setPreset(key) {
-        $('editor').value = JSON.stringify(PRESETS[key], null, 2);
-      }
+        presetFromLocation() {
+          const key = new URLSearchParams(location.search).get('preset');
+          return FormDslPage.PRESETS[key] ? key : 'ok';
+        }
 
-      function showDiagnostics(result) {
+        setPreset(key) {
+          this.$('editor').value = JSON.stringify(FormDslPage.PRESETS[key], null, 2);
+        }
+
+        showDiagnostics(result) {
         const lines = [...result.errors, ...result.warnings].map((item) => {
           const cls = item.severity === 'error' ? 'error' : 'warning';
           const tag = item.severity === 'error' ? '[错误]' : '[警告]';
           return '<span class="' + cls + '">' + tag + '</span> ' + item.message + (item.path ? '（' + item.path + '）' : '');
         });
-        $('diagnostics').innerHTML = lines.length ? lines.join('\n') : '<span class="ok">✓ 校验通过</span>';
+        this.$('diagnostics').innerHTML = lines.length ? lines.join('\n') : '<span class="ok">✓ 校验通过</span>';
       }
 
       /**
@@ -221,51 +234,53 @@
        * 封顶是 DSL 那边 `maxWidth`（默认 640）的活，宿主别把这条规则抄一遍。
        * 不传的话会退回 dsl.width ?? 360 —— 在更宽的容器里右边就会空出一片（见 README §8.1）。
        */
-      function hostWidth() {
+      hostWidth() {
         const pad = 32; // #stage 的 padding: 16px
-        return Math.max(240, $('stage').clientWidth - pad);
+        return Math.max(240, this.$('stage').clientWidth - pad);
       }
 
-      function render() {
-        $('values').textContent = '';
+      render() {
+        this.$('values').textContent = '';
         window.__form = null;
-        if (current) {
-          current.destroy();
-          current = null;
+        if (this.current) {
+          this.current.destroy();
+          this.current = null;
         }
 
         let dsl;
         try {
-          dsl = JSON.parse($('editor').value);
+          dsl = JSON.parse(this.$('editor').value);
         } catch (err) {
-          $('diagnostics').innerHTML = '<span class="error">[错误]</span> JSON 解析失败：' + err.message;
-          $('status').textContent = '';
+          this.$('diagnostics').innerHTML = '<span class="error">[错误]</span> JSON 解析失败：' + err.message;
+          this.$('status').textContent = '';
           return;
         }
 
         // 先看诊断再决定要不要画 —— 校验器对任何输入都不抛异常
         const diagnostics = ICEWEBDSL.validateFormDsl(dsl);
-        showDiagnostics(diagnostics);
+        this.showDiagnostics(diagnostics);
         if (!diagnostics.valid) {
-          $('status').textContent = '未渲染（校验不通过）';
+          this.$('status').textContent = '未渲染（校验不通过）';
           return;
         }
 
         try {
-          current = ICEWEBDSL.renderFormDsl('form', dsl, {
-            width: hostWidth(),
-            onSubmit(values) {
-              $('values').textContent = '提交值：' + JSON.stringify(values);
+          this.current = ICEWEBDSL.renderFormDsl('form', dsl, {
+            width: this.hostWidth(),
+            // 注意：这里必须是箭头函数 —— 写成对象方法的话，里面的 this 是 options 对象，
+            // 拿不到页面实例（改造时真踩了：提交后 #values 不更新）。
+            onSubmit: (values) => {
+              this.$('values').textContent = '提交值：' + JSON.stringify(values);
             },
           });
-          $('status').textContent = '已渲染 · 字段 ' + current.compiled.fieldNames.length + ' 个';
+          this.$('status').textContent = '已渲染 · 字段 ' + this.current.compiled.fieldNames.length + ' 个';
           // 调试 / e2e 用：canvas 里没有 DOM 目标，测试要点中控件就得拿到它的位置
-          window.__form = current;
+          window.__form = this.current;
           // 画布尺寸是宿主的事：DSL 不管坐标，也不管画布多大
-          fit();
+          this.fit();
         } catch (err) {
-          $('diagnostics').innerHTML = '<span class="error">[错误]</span> ' + err.message;
-          $('status').textContent = '';
+          this.$('diagnostics').innerHTML = '<span class="error">[错误]</span> ' + err.message;
+          this.$('status').textContent = '';
         }
       }
 
@@ -279,28 +294,30 @@
        * DSL 会把宿主给的宽度夹到 `maxWidth`（默认 640），拿容器宽度去定画布就会
        * 宽出一截、右边空一块 —— 看起来跟没修一样。高度同样是量出来的。
        */
-      function fit() {
-        if (!current) return;
-        current.setWidth(hostWidth());
-        const width = current.width;
-        current.resize(width, 720);
-        const measured = current.measureContentHeight();
-        current.resize(width, measured > 0 ? Math.ceil(measured) + 24 : 500);
+      fit() {
+        if (!this.current) return;
+        this.current.setWidth(this.hostWidth());
+        const width = this.current.width;
+        this.current.resize(width, 720);
+        const measured = this.current.measureContentHeight();
+        this.current.resize(width, measured > 0 ? Math.ceil(measured) + 24 : 500);
       }
 
-      document.querySelectorAll('[data-preset]').forEach((button) => {
-        button.addEventListener('click', () => {
-          setPreset(button.dataset.preset);
-          render();
+      __wireToolbar() {
+        document.querySelectorAll('[data-preset]').forEach((button) => {
+          button.addEventListener('click', () => {
+            this.setPreset(button.dataset.preset);
+            this.render();
+          });
         });
-      });
-      $('render').addEventListener('click', render);
-      // 容器尺寸变了要重新对齐 —— 这一条就是 README §8.1 说的那件事
-      window.addEventListener('resize', fit);
+        this.$('render').addEventListener('click', () => this.render());
+        // 容器尺寸变了要重新对齐 —— 这一条就是 README §8.1 说的那件事
+        window.addEventListener('resize', () => this.fit());
+      }
 
-      setPreset(presetFromLocation());
-      render();
-      wired = true;
+      }
+
+      new FormDslPage();
     </script>
   </body>
 </html>
