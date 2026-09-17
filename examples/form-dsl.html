@@ -147,8 +147,8 @@
        * 表单 DSL 渲染示例页。
        *
        * 页面写法与家族其它示例一致：**一页 = 一个类**，构造期把 DOM 引用、事件与首次渲染一次做完。
-       * 这页没有 `onUpdate()` —— 它的"变化"是**用户驱动**的（改 JSON / 换预设后点渲染），
-       * 不是宿主推数据，所以刷新入口就是 `render()` 本身。
+       * 这页的"变化"是**用户驱动**的（改 JSON / 换预设后点渲染），不是宿主推数据，
+       * 所以刷新入口就是 `onUpdate()`（按钮点它重渲）。
        */
       class FormDslPage {
         static PRESETS = {
@@ -207,7 +207,7 @@
 
           this.__wireToolbar();
           this.setPreset(this.presetFromLocation());
-          this.render();
+          this.onUpdate();
         }
 
         presetFromLocation() {
@@ -239,7 +239,7 @@
         return Math.max(240, this.$('stage').clientWidth - pad);
       }
 
-      render() {
+      onUpdate() {
         this.$('values').textContent = '';
         window.__form = null;
         if (this.current) {
@@ -307,10 +307,10 @@
         document.querySelectorAll('[data-preset]').forEach((button) => {
           button.addEventListener('click', () => {
             this.setPreset(button.dataset.preset);
-            this.render();
+            this.onUpdate();
           });
         });
-        this.$('render').addEventListener('click', () => this.render());
+        this.$('render').addEventListener('click', () => this.onUpdate());
         // 容器尺寸变了要重新对齐 —— 这一条就是 README §8.1 说的那件事
         window.addEventListener('resize', () => this.fit());
       }
