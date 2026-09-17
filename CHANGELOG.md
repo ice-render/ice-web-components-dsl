@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.1 - 2026-09-17
+
+### 修复
+
+- **组件清单跟上 `ice-web-components` 1.13.0。** `catalog/components.json` 与 `SKILL.md §7` 是从上游产物
+  生成的清单，此前一直停在记录 **1.11.2** 的状态 —— `catalog:check` 在本次发版后直接红。差异分两类：
+  ① 上游 1.13.0 的变化（`ICEWidget` 新增 `onMount` / `onUnmount` / `onShow` / `onHide` / `onResize` /
+  `initEvents`，`ICEContainer` 的摘要换成容器契约）；② **1.12.0 时期就漏掉的**某组件新增的 `height` ——
+  也就是说这份清单在本次之前就已经漂移，只是没人跑这个门禁。重生成后：9 组 / 185 条目 / 类 113 /
+  已接入 20 / 待接 0。
+- devDependency `ice-web-components` `^1.11.2 → ^1.13.0`（peer 范围 `^1.11.0` 本来就覆盖，不动）。
+
+### 文档 / 示例
+
+- `examples/form-dsl.html` 按家族的示例页写法改成**一页一个类**（构造期建好、事件分组挂好）。
+  这页的"变化"是**用户驱动**的（改 JSON / 换预设后点渲染），所以按约定不加 `onUpdate()`，
+  刷新入口就是 `render()` 本身。
+
 ## 0.3.0 - 2026-09-15
 
 ### 新增
