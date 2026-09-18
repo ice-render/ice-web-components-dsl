@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.3 - 2026-09-18
+
+### 变更
+
+- **组件清单同步到 `ice-web-components 1.19.3` / `ice-render 2.15.0`**（`catalog/components.json`
+  与 SKILL.md §7 重新生成）。这两份是**随包发布的给 Agent 看的组件清单**，而 npm 上 0.3.2 的
+  产物里记的还是 `ice-web-components` **1.13.1** —— 落后六个版本，等于用户手里的清单描述的是旧库。
+- peer / dev 依赖下限对齐到 `ice-render ^2.15.0`、`ice-web-components ^1.19.3`。
+- 触发这次同步的是一条真问题：上游 `ICEForm` 的类文档**第一段会被摘成清单里的一条摘要**，
+  而摘要**有 500 字上限**（`tests/catalog.test.ts` 守着）—— 上游 1.19.2 那段写得太长被门禁拦下，
+  于是上游收短、本仓重新生成（上游侧记在它的 1.19.3 CHANGELOG 里）。
+
+### 门禁
+
+- types:check ✅、catalog:check ✅、build ✅、jest **7 套件 / 132 用例** ✅、真机 e2e **10/10** ✅。
+- 依赖是**真装**的（不是只改 lock）：`node_modules` 里 `ice-web-components` 1.19.3 /
+  `ice-render` 2.15.0，顺带验证了发布产物本身。踩到两个已知坑各一次：npm 传播延迟
+  （刚发布的版本会先报 `notarget`）与 node_modules 陈旧副本（`npm ls` 报新版本、磁盘还是旧的，
+  挪走重装才对）。
+
 ## 0.3.2 - 2026-09-17
 
 ### 文档
