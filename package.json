@@ -49,7 +49,7 @@
     "catalog:check": "node tools/gen-catalog.mjs --check"
   },
   "peerDependencies": {
-    "ice-render": "^2.16.0",
+    "ice-render": "^2.17.0",
     "ice-web-components": "^1.19.3"
   },
   "devDependencies": {
