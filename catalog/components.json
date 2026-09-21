@@ -2,7 +2,7 @@
   "$generated": "node tools/gen-catalog.mjs —— 不要手改这个文件",
   "from": {
     "package": "ice-web-components",
-    "version": "1.22.3",
+    "version": "1.22.4",
     "groups": "scripts/gen-docs.mjs 的 GROUPS",
     "detail": "docs/api/*.md"
   },
